@@ -1,36 +1,44 @@
-import { notes } from '../data';
+import { supabase } from '../../supabaseClient';
+
+
+async function getNoteById(id: number) {
+    const { data, error } = await supabase.from('notes').select('*').eq('id', id).single();
+    return { data, error };
+}
 
 // entender melhor sobre noteId, note, { id }
-
 // GET /api/notes/[id]
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const noteId = Number(id);
-    const note = notes.find(n => n.id === noteId);
+    const noteId = Number(id)
+    const { data, error } = await supabase.from('notes').select('*').eq('id', noteId).single();
 
-    if (note) {
-        return Response.json(note);
-    } else {
-        return Response.json({ error: 'Not found' }, { status: 404 })
+    if (error) {
+        return Response.json({ error: error.message }, { status: 404 });
     }
+    return Response.json(data, { status: 201 });
 }
 
 // PUT /api/notes/[id]
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const noteId = Number(id);
-    const data = await request.json()
-    const note = notes.find(n => n.id === noteId);
+    // this is the data from the sent request
+    const { title, body } = await request.json();
 
+    const { data, error } = await supabase 
+        .from('notes')
+        .update({ title, body })
+        .eq('id', noteId)
+        .select()
+        .single()
+    
     // se algum campo for alterado, o valor passa a ser o novo da requisicao
     // nullish operator 
-    if (note) {
-        note.title = data.title ?? note.title;
-        note.body = data.body ?? note.body;
-        return Response.json(note);
-    } else {
-        return Response.json({ error: 'Not Found' }, { status: 404 })
-    }
+    if (error) {
+        return Response.json({ error: error.message }, { status: 404 })
+    } 
+    return Response.json(data);
 
 }
 
@@ -38,12 +46,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const noteId = Number(id);
-    const index = notes.findIndex(n => n.id === noteId);
+    const { error } = await supabase
+        .from('notes')
+        .delete()
+        .eq('id', noteId)
 
-    if (index !== -1) {
-        notes.splice(index, 1);
-        return Response.json({ sucess: true });
-    } else {
-        return Response.json({ error: 'Not found' }, { status: 404 })
-    }
+    if (error) {
+        return Response.json({ error: error.message }, { status: 404 })
+    } 
+    return Response.json({ success: true })
 }

@@ -78,8 +78,6 @@ Create a `.env.local` file:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-AI_API_KEY=your_ai_api_key
 ```
 
 4. Run the development server

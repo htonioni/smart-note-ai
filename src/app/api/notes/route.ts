@@ -1,9 +1,15 @@
 import { supabase } from '../supabaseClient';
 
-const { data, error } = await supabase.from('notes').select('*');
 
 // GET /api/notes
 export async function GET() {
+
+  // add update at column to the table.
+ const { data, error } = await supabase
+  .from('notes')
+  .select('*')
+  .order('created_at', { ascending: false });
+
   if (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
