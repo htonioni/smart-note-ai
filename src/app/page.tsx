@@ -7,6 +7,7 @@ type Note = {
 };
 import Button from '@mui/material/Button';
 import { Box, Stack, TextField, Paper, Typography, Card, CardContent, IconButton, Fade, Zoom } from '@mui/material';
+import ClearIcon from '@mui/icons-material/Clear';
 
 
 
@@ -42,6 +43,19 @@ export default function Home() {
       alert('Error on add note.')
     }
   };
+
+  const handleDeleteNote = async (noteIdToBeDeleted: number) => {
+    const response = await fetch(`/api/notes/${noteIdToBeDeleted}`, {
+      method: "DELETE"
+    });
+
+    if (response.ok) {
+      setNotes(notes.filter(note => note.id !== noteIdToBeDeleted))
+    } else {
+      alert("Error deleting note")
+    }
+
+  }
 
   return (
     <Box
@@ -102,13 +116,22 @@ export default function Home() {
             )}
             {notes.map((note) => (
               <Card key={note.id} variant="outlined" sx={{ bgcolor: '#fff' }}>
-                <CardContent>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }} gutterBottom>
-                    {note.title}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    {note.body}
-                  </Typography>
+                <CardContent sx={{ display: "flex", justifyContent: 'space-between' }}>
+                  <Box >
+                    <Typography variant="h6" sx={{ fontWeight: 600 }} gutterBottom>
+                      {note.title}
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                      {note.body}
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <IconButton>
+                      <ClearIcon
+                        onClick={() => handleDeleteNote(note.id)}
+                      />
+                    </IconButton>
+                  </Box>
                 </CardContent>
               </Card>
             ))}
