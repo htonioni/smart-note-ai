@@ -7,7 +7,7 @@ type Note = {
 };
 import Button from '@mui/material/Button';
 import { Box, Stack, TextField, Paper, Typography, Card, CardContent, IconButton, Fade, Zoom } from '@mui/material';
-import { Add as AddIcon, NoteAlt as NoteIcon } from '@mui/icons-material';
+
 
 
 export default function Home() {
@@ -21,7 +21,7 @@ export default function Home() {
     fetch('/api/notes')
       .then(res => res.json())
       .then(data => setNotes(data));
-  })
+  }, []);
 
   const handleAddNote = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,57 +58,62 @@ export default function Home() {
       <Typography variant="h3" component="h1" sx={{ mb: 4, fontWeight: 700, color: '#1976d2' }}>
         SmartNote AI
       </Typography>
-      <Paper elevation={3} sx={{ p: 4, mb: 5, width: '100%', maxWidth: 420 }}>
-        <Typography variant="h6" sx={{ mb: 2, fontWeight: 500 }}>
-          New Note
-        </Typography>
-        <form onSubmit={handleAddNote}>
+
+      <Box sx={{ display: 'flex' }}>
+        <Box sx={{ width: '40vw' }}>
+          <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
+            New Note
+          </Typography>
+          <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 420, height: '60vh' }}>
+            <form onSubmit={handleAddNote}>
+              <Stack spacing={2}>
+                <TextField
+                  label="Título"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  variant="outlined"
+                  required
+                  fullWidth
+                />
+                <TextField
+                  label="Conteúdo"
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  variant="outlined"
+                  multiline
+                  rows={4}
+                  required
+                  fullWidth
+                />
+                <Button type="submit" variant="contained" size="large" sx={{ alignSelf: 'flex-end' }}>
+                  Add Note
+                </Button>
+              </Stack>
+            </form>
+          </Paper>
+        </Box>
+        <Box sx={{ width: '40vw' }}>
+          <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
+            My notes
+          </Typography>
           <Stack spacing={2}>
-            <TextField
-              label="Título"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              variant="outlined"
-              required
-              fullWidth
-            />
-            <TextField
-              label="Conteúdo"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              variant="outlined"
-              multiline
-              rows={4}
-              required
-              fullWidth
-            />
-            <Button type="submit" variant="contained" size="large" sx={{ alignSelf: 'flex-end' }}>
-              Add Note
-            </Button>
+            {notes.length === 0 && (
+              <Typography color="text.secondary">You don't have notes, create a note now!.</Typography>
+            )}
+            {notes.map((note) => (
+              <Card key={note.id} variant="outlined" sx={{ bgcolor: '#fff' }}>
+                <CardContent>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }} gutterBottom>
+                    {note.title}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    {note.body}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
           </Stack>
-        </form>
-      </Paper>
-      <Box sx={{ width: '100%', maxWidth: 600 }}>
-        <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
-          My notes
-        </Typography>
-        <Stack spacing={2}>
-          {notes.length === 0 && (
-            <Typography color="text.secondary">You don't have notes, create a note now!.</Typography>
-          )}
-          {notes.map((note) => (
-            <Card key={note.id} variant="outlined" sx={{ bgcolor: '#fff' }}>
-              <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 600 }} gutterBottom>
-                  {note.title}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  {note.body}
-                </Typography>
-              </CardContent>
-            </Card>
-          ))}
-        </Stack>
+        </Box>
       </Box>
     </Box>
   );
