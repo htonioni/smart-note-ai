@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SmartNote Army",
+  title: "SmartNote AI",
   description: "A note management application with automatic tag suggestions powered by artificial intelligence.",
 };
 

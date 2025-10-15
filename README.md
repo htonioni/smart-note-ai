@@ -1,11 +1,11 @@
 
-# 📝 SmartNote Army
+# 📝 SmartNote AI
 
 A full-stack note management application with automatic tag suggestions powered by artificial intelligence.
 
 ## 🎯 About the Project
 
-**SmartNote Army** is a modern application that combines note management with the power of artificial intelligence to automatically organize and categorize your content. When creating or editing a note, the AI analyzes the text and suggests relevant tags or automatic summaries, making it easier to organize and search for information.
+**SmartNote AI** is a modern application that combines note management with the power of artificial intelligence to automatically organize and categorize your content. When creating or editing a note, the AI analyzes the text and suggests relevant tags or automatic summaries, making it easier to organize and search for information.
 
 ## ✨ Features
 
@@ -63,8 +63,8 @@ User → Frontend → API Route → Supabase (saves note)
 
 1. Clone the repository
 ```bash
-git clone <your-repository>
-cd SmartNote_Army
+git clone https://github.com/htonioni/smart-note-ai.git
+cd smart-note-ai
 ```
 
 2. Install dependencies
