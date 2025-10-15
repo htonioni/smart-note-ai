@@ -1,5 +1,7 @@
 import { notes } from '../data';
 
+// entender melhor sobre noteId, note, { id }
+
 // GET /api/notes/[id]
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;

@@ -1,18 +1,30 @@
-import { notes } from './data'
+import { supabase } from '../supabaseClient';
+
+const { data, error } = await supabase.from('notes').select('*');
 
 // GET /api/notes
 export async function GET() {
-  return Response.json(notes);
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+  return Response.json(data);
 }
 
 // POST /api/notes
 export async function POST(request: Request) {
-  const data = await request.json();
-  const newNote = {
-    id: notes.length ? notes[notes.length - 1].id + 1 : 1,
-    title: data.title,
-    body: data.body,
-  };
-  notes.push(newNote);
-  return Response.json(newNote, { status: 201 });
+  // const { title, body } = await request.json();
+  const json = await request.json()
+  const title = json.title
+  const body = json.body
+
+  const { data, error } = await supabase
+    .from('notes')
+    .insert([{ title, body }])
+    .select()
+    .single();
+
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+  return Response.json(data, { status: 201 });
 }
