@@ -1,27 +1,40 @@
 'use client';
-import { useState, useEffect } from 'react';
 type Note = {
   id: number;
   title: string;
   body: string;
 };
+import { useState, useEffect } from 'react';
 import Button from '@mui/material/Button';
-import { Box, Stack, TextField, Paper, Typography, Card, CardContent, IconButton, Fade, Zoom } from '@mui/material';
+import { Box, Stack, TextField, Paper, Typography, Card, CardContent, IconButton, Skeleton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
+import EditIcon from '@mui/icons-material/Edit';
 
 
 
 export default function Home() {
-
   const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [editNote, setEditNote] = useState<Note | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editBody, setEditBody] = useState('');
+  const [saving, setSaving] = useState(false);
+
+
 
   // xisnove para dedurar toda vez que inicia o app
   useEffect(() => {
     fetch('/api/notes')
       .then(res => res.json())
-      .then(data => setNotes(data));
+      .then(data => {
+        setNotes(data)
+        setLoading(false)
+      });
   }, []);
 
   const handleAddNote = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -54,8 +67,14 @@ export default function Home() {
     } else {
       alert("Error deleting note")
     }
-
   }
+
+  const handleEditNote = (note: Note) => {
+    setEditNote(note);
+    setEditTitle(note.title);
+    setEditBody(note.body);
+    setEditOpen(true);
+  };
 
   return (
     <Box
@@ -82,7 +101,7 @@ export default function Home() {
             <form onSubmit={handleAddNote}>
               <Stack spacing={2}>
                 <TextField
-                  label="Título"
+                  label="Title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   variant="outlined"
@@ -90,7 +109,7 @@ export default function Home() {
                   fullWidth
                 />
                 <TextField
-                  label="Conteúdo"
+                  label="Content"
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   variant="outlined"
@@ -111,33 +130,109 @@ export default function Home() {
             My notes
           </Typography>
           <Stack spacing={2}>
-            {notes.length === 0 && (
-              <Typography color="text.secondary">You don't have notes, create a note now!.</Typography>
-            )}
-            {notes.map((note) => (
-              <Card key={note.id} variant="outlined" sx={{ bgcolor: '#fff' }}>
-                <CardContent sx={{ display: "flex", justifyContent: 'space-between' }}>
-                  <Box >
-                    <Typography variant="h6" sx={{ fontWeight: 600 }} gutterBottom>
-                      {note.title}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                      {note.body}
-                    </Typography>
-                  </Box>
-                  <Box>
-                    <IconButton>
-                      <ClearIcon
-                        onClick={() => handleDeleteNote(note.id)}
-                      />
-                    </IconButton>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
+            {loading ? (
+              <>
+                <Skeleton variant='rectangular' animation="wave" height={100} />
+                <Skeleton variant='rectangular' animation="wave" height={100} />
+                <Skeleton variant='rectangular' animation="wave" height={100} />
+              </>
+            ) : (
+              <>
+                {notes.length === 0 && (
+                  <Typography color="text.secondary">You don't have notes, create a note now!.</Typography>
+                )}
+                {notes.map((note) => (
+                  <Card key={note.id} variant="outlined" sx={{ bgcolor: '#fff' }}>
+                    <CardContent sx={{ display: "flex", justifyContent: 'space-between' }}>
+                      <Box >
+                        <Typography variant="h6" sx={{ fontWeight: 600 }} gutterBottom>
+                          {note.title}
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                          {note.body}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex' }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+                          <IconButton onClick={() => handleEditNote(note)}>
+                            <EditIcon
+                              fontSize='small'
+                            />
+                          </IconButton>
+                        </Box>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+                          <IconButton onClick={() => handleDeleteNote(note.id)}>
+                            <ClearIcon
+                              fontSize='small'
+                            />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                ))}
+              </>
+            )
+            }
           </Stack>
         </Box>
       </Box>
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)}>
+        <DialogTitle>Edit Note</DialogTitle>
+        <DialogContent>
+          <TextField
+            label='Title'
+            value={editTitle}
+            onChange={e => setEditTitle(e.target.value)}
+            fullWidth
+            margin='dense'
+          />
+          <TextField
+            label='Content'
+            value={editBody}
+            onChange={e => setEditBody(e.target.value)}
+            fullWidth
+            margin='dense'
+            multiline
+            rows={4}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setEditOpen(false)
+              setEditTitle('')
+              setEditBody('')
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={async () => {
+              if (!editNote) return;
+              setSaving(true)
+              const response = await fetch(`/api/notes/${editNote.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: editTitle.trim(), body: editBody.trim() }),
+              });
+              setSaving(false)
+              if (response.ok) {
+                const updateNote = await response.json();
+                setNotes(notes.map(n => n.id === updateNote.id ? updateNote : n))
+                setEditOpen(false);
+              } else {
+                alert('Error updating note');
+              }
+            }}
+            variant='contained'
+            disabled={saving}
+            endIcon={saving ? <CircularProgress size={20} /> : null}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

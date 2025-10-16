@@ -26,18 +26,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     // this is the data from the sent request
     const { title, body } = await request.json();
 
-    const { data, error } = await supabase 
+    const { data, error } = await supabase
         .from('notes')
         .update({ title, body })
         .eq('id', noteId)
         .select()
         .single()
-    
+
     // se algum campo for alterado, o valor passa a ser o novo da requisicao
     // nullish operator 
     if (error) {
         return Response.json({ error: error.message }, { status: 404 })
-    } 
+    }
     return Response.json(data);
 
 }
@@ -53,6 +53,6 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     if (error) {
         return Response.json({ error: error.message }, { status: 404 })
-    } 
+    }
     return Response.json({ success: true })
 }
