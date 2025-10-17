@@ -1,15 +1,17 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Note } from '../types/note'
-import { Button, Box, Stack, TextField, Paper, Typography, Card, CardContent, IconButton, Skeleton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Chip, Container } from '@mui/material';
+import { Button, Box, Stack, TextField, Paper, Typography, Card, CardContent, IconButton, Skeleton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Container, FormControlLabel, Checkbox, Chip } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import EditIcon from '@mui/icons-material/Edit';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 
 
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [aiEnabled, setAiEnabled] = useState(false);
 
   // fetching data
   const [loading, setLoading] = useState(true);
@@ -44,10 +46,38 @@ export default function Home() {
     e.preventDefault();
     if (!title.trim() || !body.trim()) return;
 
+    let aiTags = null;
+
+    if (aiEnabled) {
+      try {
+        const aiResponse = await fetch('/api/ai/suggest-tags', {
+          method: 'POST',
+          headers: { 'Content-Type ': 'application/json' },
+          body: JSON.stringify({
+            id: 0, // temp
+            title: title.trim(),
+            body: body.trim()
+          })
+        });
+
+        const aiResult = await aiResponse.json();
+
+        if (aiResult.success) {
+          aiTags = aiResult.data.tags;
+        }
+      } catch (error) {
+        console.error('AI generation failed:', error);
+      }
+    }
+
     const response = await fetch('/api/notes', {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, body })
+      body: JSON.stringify({
+        title: title.trim(),
+        body: body.trim(),
+        tags: aiTags
+      })
     })
 
     if (response.ok) {
@@ -55,6 +85,7 @@ export default function Home() {
       setNotes([...notes, newNote]);
       setTitle('');
       setBody('');
+      setAiEnabled(false);
     } else {
       alert('Error on add note.')
     }
@@ -71,6 +102,42 @@ export default function Home() {
     setEditBody(note.body);
     setEditOpen(true);
   };
+
+  const handleGenerateAITags = async (noteId: number) => {
+    try {
+      const note = notes.find(n => n.id === noteId);
+      if (!note) return;
+
+      const response = await fetch('/api/ai/suggest-tags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: note.id,
+          title: note.title,
+          body: note.body
+        })
+      })
+
+      const result = await response.json();
+
+      if (result.success) {
+        const updatedNote = { ...note, tags: result.data.tags };
+
+        await fetch(`/api/notes/${noteId}`, {
+          method: 'PUT',
+          headers: { 'Content-type': 'application/json' },
+          body: JSON.stringify(updatedNote)
+        });
+
+        setNotes(notes.map(n => n.id === noteId ? updatedNote : n));
+
+        alert(`Generated tags: ${result.data.tags.join(', ')}`);
+      }
+    } catch (error) {
+      console.error('Error generating AI tags:', error);
+      alert('Failed to generate AI tags');
+    }
+  }
 
   return (
     <Box
@@ -205,6 +272,10 @@ export default function Home() {
                         }
                       }
                     }}
+                  />
+                  <FormControlLabel
+                    control={<Checkbox checked={aiEnabled} onChange={(e) => setAiEnabled(e.target.checked)} />}
+                    label="Auto generate AI tags"
                   />
                   <Button
                     type="submit"
@@ -343,7 +414,36 @@ export default function Home() {
                             >
                               {note.body}
                             </Typography>
+                            {note.tags && note.tags.length > 0 && (
+                              <Box sx={{ mt: 2, mb: 1 }}>
+                                <Stack direction="row" spacing={1} flexWrap="wrap">
+                                  {note.tags.map((tag, index) => (
+                                    <Chip
+                                      key={index}
+                                      label={tag}
+                                      size="small"
+                                      sx={{
+                                        bgcolor: '#e3f2fd',
+                                        color: '#1976d2',
+                                        fontSize: '0.75rem',
+                                        height: '24px',
+                                        mb: 0.5
+                                      }}
+                                    />
+                                  ))}
+                                </Stack>
+                              </Box>
+                            )}
                           </Box>
+                          <IconButton
+                            onClick={() => handleGenerateAITags(note.id)}
+                            sx={{
+                              bgcolor: 'linear-gradient(45deg, #9c27b0, #673ab7)',
+                              '&:hover': { bgcolor: '#f8717180' }
+                            }}
+                          >
+                            <AutoAwesomeIcon />
+                          </IconButton>
                           <IconButton
                             onClick={() => handleEditNote(note)}
                             sx={{

@@ -20,26 +20,21 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 // PUT /api/notes/[id]
-export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const noteId = Number(id);
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
     // this is the data from the sent request
-    const { title, body } = await request.json();
+    const { title, body, tags } = await request.json();
 
     const { data, error } = await supabase
         .from('notes')
-        .update({ title, body })
-        .eq('id', noteId)
+        .update({ title, body, tags })
+        .eq('id', params.id)
         .select()
         .single()
 
-    // se algum campo for alterado, o valor passa a ser o novo da requisicao
-    // nullish operator 
     if (error) {
         return Response.json({ error: error.message }, { status: 404 })
     }
     return Response.json(data);
-
 }
 
 // DELETE /api/notes/[id]
