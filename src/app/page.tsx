@@ -1,33 +1,35 @@
 'use client';
-type Note = {
-  id: number;
-  title: string;
-  body: string;
-};
 import { useState, useEffect } from 'react';
-import Button from '@mui/material/Button';
-import { Box, Stack, TextField, Paper, Typography, Card, CardContent, IconButton, Skeleton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
+import { Note } from '../types/note'
+import { Button, Box, Stack, TextField, Paper, Typography, Card, CardContent, IconButton, Skeleton, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, Chip, Container } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import EditIcon from '@mui/icons-material/Edit';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 
 
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [loading, setLoading] = useState(true);
 
+  // fetching data
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // creating note?
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
 
+  // modals
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [noteToDelete, setNoteToDelete] = useState<Note | null>(null)
   const [editOpen, setEditOpen] = useState(false);
   const [editNote, setEditNote] = useState<Note | null>(null);
+
   const [editTitle, setEditTitle] = useState('');
   const [editBody, setEditBody] = useState('');
-  const [saving, setSaving] = useState(false);
 
 
-
-  // xisnove para dedurar toda vez que inicia o app
+  // xisnove para dedurar toda vez que inicia o app -- checar
   useEffect(() => {
     fetch('/api/notes')
       .then(res => res.json())
@@ -37,6 +39,7 @@ export default function Home() {
       });
   }, []);
 
+  // add loading to button when using post request
   const handleAddNote = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!title.trim() || !body.trim()) return;
@@ -57,16 +60,9 @@ export default function Home() {
     }
   };
 
-  const handleDeleteNote = async (noteIdToBeDeleted: number) => {
-    const response = await fetch(`/api/notes/${noteIdToBeDeleted}`, {
-      method: "DELETE"
-    });
-
-    if (response.ok) {
-      setNotes(notes.filter(note => note.id !== noteIdToBeDeleted))
-    } else {
-      alert("Error deleting note")
-    }
+  const handleDeleteNote = async (note: Note) => {
+    setNoteToDelete(note);
+    setDeleteOpen(true);
   }
 
   const handleEditNote = (note: Note) => {
@@ -80,103 +76,311 @@ export default function Home() {
     <Box
       sx={{
         minHeight: '100vh',
-        bgcolor: '#f5f6fa',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        py: 6,
+        bgcolor: '#f8f9fa',
+        py: 4,
+        px: 10,
+        color: '#0f172a'
       }}
     >
-      <Typography variant="h3" component="h1" sx={{ mb: 4, fontWeight: 700, color: '#1976d2' }}>
-        SmartNote AI
-      </Typography>
-
-      <Box sx={{ display: 'flex' }}>
-        <Box sx={{ width: '40vw' }}>
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
-            New Note
+      <Container maxWidth="xl">
+        {/* header section */}
+        <Box sx={{ textAlign: 'center', mb: 5 }}>
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{
+              fontWeight: 700,
+              mb: 3,
+              letterSpacing: '-1px',
+              fontSize: { xs: '3rem', md: '4rem', lg: '4.5rem' },
+              lineHeight: 1.1,
+              fontFamily: 'var(--font-lexend)'
+            }}
+          >
+            Smart
+            <Box component="span" sx={{ color: '#f87171' }}>
+              Note
+            </Box>
+            {' '}AI
           </Typography>
-          <Paper elevation={3} sx={{ p: 4, width: '100%', maxWidth: 420, height: '60vh' }}>
-            <form onSubmit={handleAddNote}>
-              <Stack spacing={2}>
-                <TextField
-                  label="Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  variant="outlined"
-                  required
-                  fullWidth
-                />
-                <TextField
-                  label="Content"
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  variant="outlined"
-                  multiline
-                  rows={4}
-                  required
-                  fullWidth
-                />
-                <Button type="submit" variant="contained" size="large" sx={{ alignSelf: 'flex-end' }}>
-                  Add Note
-                </Button>
-              </Stack>
-            </form>
-          </Paper>
         </Box>
-        <Box sx={{ width: '40vw' }}>
-          <Typography variant="h5" sx={{ mb: 2, fontWeight: 600, color: '#333' }}>
-            My notes
-          </Typography>
-          <Stack spacing={2}>
-            {loading ? (
-              <>
-                <Skeleton variant='rectangular' animation="wave" height={100} />
-                <Skeleton variant='rectangular' animation="wave" height={100} />
-                <Skeleton variant='rectangular' animation="wave" height={100} />
-              </>
-            ) : (
-              <>
-                {notes.length === 0 && (
-                  <Typography color="text.secondary">You don't have notes, create a note now!.</Typography>
-                )}
-                {notes.map((note) => (
-                  <Card key={note.id} variant="outlined" sx={{ bgcolor: '#fff' }}>
-                    <CardContent sx={{ display: "flex", justifyContent: 'space-between' }}>
-                      <Box >
-                        <Typography variant="h6" sx={{ fontWeight: 600 }} gutterBottom>
-                          {note.title}
-                        </Typography>
-                        <Typography variant="body1" color="text.secondary">
-                          {note.body}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex' }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-                          <IconButton onClick={() => handleEditNote(note)}>
+
+        {/* main section */}
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 6,
+            flexDirection: { xs: 'column', lg: 'row' },
+            alignItems: { xs: 'stretch', lg: 'flex-start' },
+            // fontFamily: 'var(--font-inter)'
+          }}
+        >
+          {/* create note section */}
+          <Box sx={{ flex: { xs: '1', lg: '0 0 500px' } }}>
+            <Typography
+              variant="h5"
+              sx={{
+                mb: 2,
+                fontWeight: 600,
+                color: '#333'
+              }}
+            >
+              Create New Note
+            </Typography>
+            <Paper
+              elevation={1}
+              sx={{
+                p: 4,
+                borderRadius: 2,
+                bgcolor: '#fffff',
+                border: '1px solid #e2e8f0',
+                position: 'sticky',
+                top: 24,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+                }
+              }}
+            >
+              <form onSubmit={handleAddNote}>
+                <Stack spacing={4}>
+                  <TextField
+                    label="Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    variant="outlined"
+                    required
+                    fullWidth
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        bgcolor: '#f8f9fa',
+                        '& fieldset': {
+                          borderColor: '#e2e8f0'
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#cbd5e0',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#4299e1',
+                          borderWidth: 2
+                        }
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: '#64748b',
+                        '&.Mui-focused': {
+                          color: '#4299e1'
+                        }
+                      }
+                    }}
+                  />
+                  <TextField
+                    label="Content"
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    variant="outlined"
+                    multiline
+                    rows={4}
+                    required
+                    fullWidth
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        bgcolor: '#f8f9fa',
+                        '& fieldset': {
+                          borderColor: '#e2e8f0'
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#cbd5e0',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#4299e1',
+                          borderWidth: 2
+                        }
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: '#64748b',
+                        '&.Mui-focused': {
+                          color: '#4299e1'
+                        }
+                      }
+                    }}
+                  />
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    sx={{
+                      borderRadius: 2,
+                      py: 1.75,
+                      bgcolor: '#0f172a',
+                      color: '#ffffff',
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      fontSize: '1rem',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        bgcolor: '#075985',
+                        boxShadow: '0 4px 12px rgba(45, 55, 72, 0.3)'
+                      }
+                    }}
+                  >
+                    Add Note
+                  </Button>
+                </Stack>
+              </form>
+            </Paper>
+          </Box>
+
+          {/* List note section */}
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant="h5"
+              sx={{
+                mb: 2,
+                fontWeight: 600,
+                color: '#333',
+              }}
+            >
+              Your Notes
+            </Typography>
+            <Stack spacing={2}>
+              {loading ? (
+                <>
+                  <Skeleton variant='rectangular' animation="wave" height={100} />
+                  <Skeleton variant='rectangular' animation="wave" height={100} />
+                  <Skeleton variant='rectangular' animation="wave" height={100} />
+                </>
+              ) : (
+                <>
+                  {notes.length === 0 && (
+                    <Paper
+                      elevation={1}
+                      sx={{
+                        p: 12,
+                        textAlign: 'center',
+                        borderRadius: 2,
+                        bgcolor: '#ffffff',
+                        border: '1px solid #e2e8f0'
+                      }}
+                    >
+                      <DescriptionOutlinedIcon
+                        sx={{
+                          fontSize: 64,
+                          color: '#cbd5e0',
+                          mb: 4
+                        }}
+                      />
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          color: '#333',
+                          fontWeight: 600,
+                          mb: 2
+                        }}
+                      >
+                        No notes yet
+                      </Typography>
+                      <Typography
+                        sx={{
+                          color: '#64748b',
+                          fontSize: '1.1rem'
+                        }}
+                      >
+                        Create your first note to get started
+                      </Typography>
+                    </Paper>
+                  )}
+                  {notes.map((note, index) => (
+                    <Card
+                      key={note.id}
+                      elevation={1}
+                      sx={{
+                        bgcolor: '#fff',
+                        borderRadius: 2,
+                        border: '1px solid #e2e8f0',
+                        transition: 'all 0.2s ease',
+                        animation: `slideIn 0.3s ease ${index * 0.1}s both`,
+                        '@keyframes slideIn': {
+                          from: {
+                            opacity: 0,
+                            transform: 'translateY(20px)'
+                          },
+                          to: {
+                            opacity: 1,
+                            transform: 'translateY(0)'
+                          }
+                        },
+                        '&:hover': {
+                          borderColor: '#cbd5e0',
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+                        }
+                      }}
+                    >
+                      <CardContent sx={{ px: 4, py: 3 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                          <Box sx={{ flex: 1, pr: 3 }}>
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                fontWeight: 600,
+                                color: '#333',
+                                mb: 1,
+                                wordBreak: 'break-word',
+                                fontSize: '1.3rem'
+                              }}
+                            >
+                              {note.title}
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              color="text.secondary"
+                              sx={{
+                                lineHeight: 1.6,
+                                wordBreak: 'break-word',
+                                whiteSpace: 'pre-wrap',
+                              }}
+                            >
+                              {note.body}
+                            </Typography>
+                          </Box>
+                          <IconButton
+                            onClick={() => handleEditNote(note)}
+                            sx={{
+                              '&:hover': {
+                                bgcolor: '#0678b790',
+                                color: '#045683'
+                              }
+                            }}
+                          >
                             <EditIcon
                               fontSize='small'
                             />
                           </IconButton>
-                        </Box>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
-                          <IconButton onClick={() => handleDeleteNote(note.id)}>
+                          <IconButton
+                            onClick={() => handleDeleteNote(note)}
+                            sx={{
+                              '&:hover': {
+                                bgcolor: '#fee2e2',
+                                color: '#dc2626'
+                              }
+                            }}
+                          >
                             <ClearIcon
                               fontSize='small'
                             />
                           </IconButton>
                         </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                ))}
-              </>
-            )
-            }
-          </Stack>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </>
+              )
+              }
+            </Stack>
+          </Box>
         </Box>
-      </Box>
+      </Container>
       <Dialog open={editOpen} onClose={() => setEditOpen(false)}>
         <DialogTitle>Edit Note</DialogTitle>
         <DialogContent>
@@ -230,6 +434,37 @@ export default function Home() {
             endIcon={saving ? <CircularProgress size={20} /> : null}
           >
             Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
+        <DialogTitle>Delete Note</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete "{noteToDelete?.title}"? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
+          <Button
+            onClick={async () => {
+              if (!noteToDelete) return;
+              setSaving(true)
+              const response = await fetch(`/api/notes/${noteToDelete.id}`, { method: 'DELETE' });
+              setSaving(false)
+              if (response.ok) {
+                setNotes(notes.filter(n => n.id !== noteToDelete.id));
+                setDeleteOpen(false);
+              } else {
+                alert("Error deleting note")
+              }
+            }}
+            variant='contained'
+            color='error'
+            disabled={saving}
+            endIcon={saving ? <CircularProgress size={20} /> : null}
+          >
+            Delete
           </Button>
         </DialogActions>
       </Dialog>
