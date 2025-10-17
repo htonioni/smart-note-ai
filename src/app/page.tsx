@@ -15,6 +15,7 @@ export default function Home() {
 
   // fetching data
   const [loading, setLoading] = useState(true);
+  const [aiLoading, setAiLoading] = useState<number | null>(null)
   const [saving, setSaving] = useState(false);
 
   // creating note?
@@ -29,6 +30,8 @@ export default function Home() {
 
   const [editTitle, setEditTitle] = useState('');
   const [editBody, setEditBody] = useState('');
+  const [editTags, setEditTags] = useState<string[]>([]);
+  const [editTagInput, setEditTagInput] = useState('');
 
 
   // xisnove para dedurar toda vez que inicia o app -- checar
@@ -41,6 +44,8 @@ export default function Home() {
       });
   }, []);
 
+  // Tag management functions
+  
   // add loading to button when using post request
   const handleAddNote = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -52,7 +57,7 @@ export default function Home() {
       try {
         const aiResponse = await fetch('/api/ai/suggest-tags', {
           method: 'POST',
-          headers: { 'Content-Type ': 'application/json' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             id: 0, // temp
             title: title.trim(),
@@ -96,14 +101,37 @@ export default function Home() {
     setDeleteOpen(true);
   }
 
+  const handleAddTag = (tagToAdd: string) => {
+    const trimmedTag = tagToAdd.trim();
+    if (trimmedTag && !editTags.includes(trimmedTag)) {
+      setEditTags([...editTags, trimmedTag]);
+    }
+    setEditTagInput('');
+  };
+
+  const handleRemoveTag = (tagToRemove: string) => {
+    setEditTags(editTags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleTagInputKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      handleAddTag(editTagInput);
+    }
+  };
+
+
   const handleEditNote = (note: Note) => {
     setEditNote(note);
     setEditTitle(note.title);
     setEditBody(note.body);
+    setEditTags(note.tags || [])
+    setEditTagInput('');
     setEditOpen(true);
   };
 
   const handleGenerateAITags = async (noteId: number) => {
+    setAiLoading(noteId);
     try {
       const note = notes.find(n => n.id === noteId);
       if (!note) return;
@@ -136,6 +164,8 @@ export default function Home() {
     } catch (error) {
       console.error('Error generating AI tags:', error);
       alert('Failed to generate AI tags');
+    } finally {
+      setAiLoading(null)
     }
   }
 
@@ -403,19 +433,8 @@ export default function Home() {
                             >
                               {note.title}
                             </Typography>
-                            <Typography
-                              variant="body1"
-                              color="text.secondary"
-                              sx={{
-                                lineHeight: 1.6,
-                                wordBreak: 'break-word',
-                                whiteSpace: 'pre-wrap',
-                              }}
-                            >
-                              {note.body}
-                            </Typography>
                             {note.tags && note.tags.length > 0 && (
-                              <Box sx={{ mt: 2, mb: 1 }}>
+                              <Box sx={{ mt: 0.5, mb: 2 }}>
                                 <Stack direction="row" spacing={1} flexWrap="wrap">
                                   {note.tags.map((tag, index) => (
                                     <Chip
@@ -434,12 +453,24 @@ export default function Home() {
                                 </Stack>
                               </Box>
                             )}
+                            <Typography
+                              variant="body1"
+                              color="text.secondary"
+                              sx={{
+                                lineHeight: 1.6,
+                                wordBreak: 'break-word',
+                                whiteSpace: 'pre-wrap',
+                              }}
+                            >
+                              {note.body}
+                            </Typography>
                           </Box>
                           <IconButton
                             onClick={() => handleGenerateAITags(note.id)}
+                            // revisao: cores e icones
                             sx={{
-                              bgcolor: 'linear-gradient(45deg, #9c27b0, #673ab7)',
-                              '&:hover': { bgcolor: '#f8717180' }
+                              bgcolor: aiLoading === note.id ? '#f5f5f5' : 'linear-gradient(45deg, #9c27b0, #673ab7)',
+                              '&:hover': { bgcolor: aiLoading === note.id ? '#f5f5f5' : '#f8717180' }
                             }}
                           >
                             <AutoAwesomeIcon />
@@ -481,6 +512,7 @@ export default function Home() {
           </Box>
         </Box>
       </Container>
+      {/* revisao: dialog style */}
       <Dialog open={editOpen} onClose={() => setEditOpen(false)}>
         <DialogTitle>Edit Note</DialogTitle>
         <DialogContent>
@@ -500,6 +532,62 @@ export default function Home() {
             multiline
             rows={4}
           />
+          
+          {/* tags Section */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+              Tags
+            </Typography>
+            
+            {/* Display existing tags as deletable chips */}
+            {editTags.length > 0 && (
+              <Box sx={{ mb: 2 }}>
+                <Stack direction="row" spacing={1} flexWrap="wrap">
+                  {editTags.map((tag, index) => (
+                    <Chip
+                      key={index}
+                      label={tag}
+                      onDelete={() => handleRemoveTag(tag)}
+                      size="small"
+                      sx={{
+                        bgcolor: '#e3f2fd',
+                        color: '#1976d2',
+                        fontSize: '0.75rem',
+                        mb: 0.5,
+                        '& .MuiChip-deleteIcon': {
+                          color: '#1976d2',
+                          '&:hover': {
+                            color: '#d32f2f'
+                          }
+                        }
+                      }}
+                    />
+                  ))}
+                </Stack>
+              </Box>
+            )}
+            {/* input for new tags */}
+            <TextField
+              label='Add new tag'
+              value={editTagInput}
+              onChange={e => setEditTagInput(e.target.value)}
+              onKeyPress={handleTagInputKeyPress}
+              onBlur={() => {
+                if (editTagInput.trim()) {
+                  handleAddTag(editTagInput);
+                }
+              }}
+              fullWidth
+              margin='dense'
+              size="small"
+              helperText="Press Enter or comma to add tag"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 1
+                }
+              }}
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button
@@ -507,6 +595,8 @@ export default function Home() {
               setEditOpen(false)
               setEditTitle('')
               setEditBody('')
+              setEditTags([])
+              setEditTagInput('')
             }}
           >
             Cancel
@@ -518,7 +608,11 @@ export default function Home() {
               const response = await fetch(`/api/notes/${editNote.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ title: editTitle.trim(), body: editBody.trim() }),
+                body: JSON.stringify({
+                  title: editTitle.trim(),
+                  body: editBody.trim(),
+                  tags: editTags
+                }),
               });
               setSaving(false)
               if (response.ok) {
