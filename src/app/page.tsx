@@ -13,37 +13,37 @@ export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
 
   // fetching data
-  const [loading, setLoading] = useState(true);
-  const [aiLoading, setAiLoading] = useState<number | null>(null)
+  const [isLoadingNotes, setIsLoadingNotes] = useState(true);
+  const [isAiGeneratingForNoteId, setIsAiGeneratingForNoteId] = useState<number | null>(null)
 
-  // modal
+  // modals state management
+  const [selectedNoteForDeletion, setSelectedNoteForDeletion] = useState<Note | null>(null)
+  const [selectedNoteForEditing, setSelectedNoteForEditing] = useState<Note | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeletingNote, setIsDeletingNote] = useState(false);
+  const [isSavingNote, setIsSavingNote] = useState(false);
 
-  // modals
-  const [noteToDelete, setNoteToDelete] = useState<Note | null>(null)
-  const [noteToEdit, setNoteToEdit] = useState<Note | null>(null);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [savingEditedNote, setSavingEditedNote] = useState(false);
-
-  // xisnove para dedurar toda vez que inicia o app -- checar
+  // load all notes when component mounts
   useEffect(() => {
     fetch('/api/notes')
       .then(res => res.json())
       .then(data => {
         setNotes(data)
-        setLoading(false)
+        setIsLoadingNotes(false)
       });
   }, []);
 
-  // add loading to button when using post request
-  const handleAddNote = async (
+  // Handle note creation with optional AI tag generation
+  // revisao: adicionar um loading ao botao de enviar
+  const handleCreateNote = async (
     title: string,
     body: string,
     aiEnabled: boolean
   ) => {
 
-    let aiTags = null
+    let generatedTags = null
+    let generatedSummary = null
 
     if (aiEnabled) {
       try {
@@ -57,38 +57,41 @@ export default function Home() {
           })
         });
 
-        const aiResult = await aiResponse.json();
+        const aiGenerationResult = await aiResponse.json();
+        console.log("This is the result IA: ", aiGenerationResult)
 
-        if (aiResult.success) {
-          aiTags = aiResult.data.tags;
+        if (aiGenerationResult.success) {
+          generatedTags = aiGenerationResult.data.tags;
+          generatedSummary = aiGenerationResult.data.summary;
         }
       } catch (error) {
         console.error('AI generation failed:', error);
       }
     }
 
-    const response = await fetch('/api/notes', {
+    const noteCreationResponse = await fetch('/api/notes', {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: title.trim(),
         body: body.trim(),
-        tags: aiTags
+        tags: generatedTags,
+        summary: generatedSummary,
       })
     })
 
-    if (response.ok) {
-      const newNote = await response.json();
+    if (noteCreationResponse.ok) {
+      const newNote = await noteCreationResponse.json();
       setNotes([...notes, newNote]);
     } else {
       alert('Error on add note.')
     }
   };
 
-  const handleSaveEditedNote = async (updatedNote: Note) => {
-    setSavingEditedNote(true)
+  const handleSaveNoteChanges = async (updatedNote: Note) => {
+    setIsSavingNote(true)
     try {
-      const response = await fetch(`api/notes/${updatedNote.id}`, {
+      const response = await fetch(`/api/notes/${updatedNote.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedNote),
@@ -97,7 +100,7 @@ export default function Home() {
       if (response.ok) {
         const savedNote = await response.json();
         setNotes(notes.map(n => n.id === savedNote.id ? savedNote : n));
-        setEditOpen(false);
+        setIsEditModalOpen(false);
       } else {
         alert('Error updating note');
       }
@@ -105,19 +108,19 @@ export default function Home() {
       console.error('Error updating note:', error)
       alert('Error updating note')
     } finally {
-      setSavingEditedNote(false)
+      setIsSavingNote(false)
     }
   }
 
-  const handleConfirmDelete = async (noteId: number) => {
-    setDeleting(true)
+  const handleConfirmNoteDeletion = async (noteId: number) => {
+    setIsDeletingNote(true)
     try {
       const response = await fetch(`/api/notes/${noteId}`, {method: 'DELETE',})
 
       if (response.ok) {
         setNotes(notes.filter(n => n.id !== noteId));
-        setDeleteOpen(false);
-        setNoteToDelete(null);
+        setIsDeleteModalOpen(false);
+        setSelectedNoteForDeletion(null);
       } else {
         alert('Error deleting note')
       }
@@ -125,22 +128,22 @@ export default function Home() {
       console.error('Error deleting note:', error);
       alert('Error deleting note')
     } finally {
-      setDeleting(false)
+      setIsDeletingNote(false)
     }
   }
 
-  const handleDeleteNote = async (note: Note) => {
-    setNoteToDelete(note);
-    setDeleteOpen(true);
+  const handleRequestNoteDeletion = async (note: Note) => {
+    setSelectedNoteForDeletion(note);
+    setIsDeleteModalOpen(true);
   }
 
-  const handleEditNote = (note: Note) => {
-    setNoteToEdit(note);
-    setEditOpen(true);  
+  const handleRequestNoteEdit = (note: Note) => {
+    setSelectedNoteForEditing(note);
+    setIsEditModalOpen(true);  
   };
 
-  const handleGenerateAITags = async (noteId: number) => {
-    setAiLoading(noteId);
+  const handleGenerateAITagsForNote = async (noteId: number) => {
+    setIsAiGeneratingForNoteId(noteId);
     try {
       const note = notes.find(n => n.id === noteId);
       if (!note) return;
@@ -174,7 +177,7 @@ export default function Home() {
       console.error('Error generating AI tags:', error);
       alert('Failed to generate AI tags');
     } finally {
-      setAiLoading(null)
+      setIsAiGeneratingForNoteId(null)
     }
   }
 
@@ -222,7 +225,7 @@ export default function Home() {
           }}
         >
           {/* create note section */}
-          <CreateNoteForm onSubmit={handleAddNote} />
+          <CreateNoteForm onSubmit={handleCreateNote} />
 
           {/* List note section */}
           <Box sx={{ flex: 1 }}>
@@ -237,7 +240,7 @@ export default function Home() {
               Your Notes
             </Typography>
             <Stack spacing={2}>
-              {loading ? (
+              {isLoadingNotes ? (
                 <>
                   <Skeleton variant='rectangular' animation="wave" height={100} />
                   <Skeleton variant='rectangular' animation="wave" height={100} />
@@ -253,10 +256,10 @@ export default function Home() {
                       key={note.id}
                       note={note}
                       index={index}
-                      onGenerateAITags={handleGenerateAITags}
-                      onEditNote={handleEditNote}
-                      onDeleteNote={handleDeleteNote}
-                      aiLoading={aiLoading}
+                      onGenerateAITags={handleGenerateAITagsForNote}
+                      onEditNote={handleRequestNoteEdit}
+                      onDeleteNote={handleRequestNoteDeletion}
+                      aiLoading={isAiGeneratingForNoteId}
                     />
                   ))}
                 </>
@@ -268,21 +271,21 @@ export default function Home() {
       </Container>
       {/* revisao: dialog style */}
       <EditNoteModal
-        note={noteToEdit}
-        open={editOpen}
-        onClose={() => setEditOpen(false)}
-        onSave={handleSaveEditedNote}
-        saving={savingEditedNote}
+        note={selectedNoteForEditing}
+        open={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSave={handleSaveNoteChanges}
+        saving={isSavingNote}
       />
       <DeleteNoteModal
-        note={noteToDelete}
-        open={deleteOpen}
+        note={selectedNoteForDeletion}
+        open={isDeleteModalOpen}
         onClose={() => {
-          setDeleteOpen(false);
-          setNoteToDelete(null);
+          setIsDeleteModalOpen(false);
+          setSelectedNoteForDeletion(null);
         }}
-        onConfirmDelete={handleConfirmDelete}
-        deleting={deleting}
+        onConfirmDelete={handleConfirmNoteDeletion}
+        deleting={isDeletingNote}
       />
     </Box>
   );
