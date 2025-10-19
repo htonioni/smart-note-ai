@@ -7,6 +7,7 @@ import CreateNoteForm from './components/CreateNoteForm'
 import NoteCard from './components/NoteCard';
 import EditNoteModal from './components/EditNoteModal';
 import DeleteNoteModal from './components/DeleteNoteModal';
+import SearchBar from './components/SearchBar';
 
 export default function Home() {
   // core notes
@@ -24,15 +25,43 @@ export default function Home() {
   const [isDeletingNote, setIsDeletingNote] = useState(false);
   const [isSavingNote, setIsSavingNote] = useState(false);
 
+  // seachbar states
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filteredNotes, setFilteredNotes] = useState<Note[]>([])
+
   // load all notes when component mounts
   useEffect(() => {
     fetch('/api/notes')
       .then(res => res.json())
       .then(data => {
         setNotes(data)
+        setFilteredNotes(data) // filtered notes
         setIsLoadingNotes(false)
       });
   }, []);
+
+  // searchbar
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredNotes(notes);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase()
+    
+    const filtered = notes.filter(note => {
+      const titleMatch = note.title.toLowerCase().includes(query);
+      const bodyMatch = note.body.toLowerCase().includes(query);
+      const tagMatch = note.tags?.some(tag =>
+        tag.toLowerCase().includes(query)
+      ) || false
+      const summaryMatch = note.summary?.toLowerCase().includes(query) || false
+
+      return titleMatch || bodyMatch || tagMatch || summaryMatch
+    })
+
+    setFilteredNotes(filtered);
+  }, [searchQuery, notes])
 
   // Handle note creation with optional AI tag generation
   // revisao: adicionar um loading ao botao de enviar
@@ -277,21 +306,40 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  {notes.length === 0 && (
+                  <SearchBar 
+                    searchQuery={searchQuery}
+                    onSearchChange={setSearchQuery}
+                    resultsCount={filteredNotes.length}
+                  />
+                  {filteredNotes.length === 0 && searchQuery.trim() ? (
+                    <Box sx={{ 
+                      textAlign: 'center', 
+                      py: 4,
+                      color: '#64748b'
+                    }}>
+                      <Typography variant="h6" sx={{ mb: 1 }}>
+                        No notes found
+                      </Typography>
+                      <Typography variant="body2">
+                        Try adjusting your search terms
+                      </Typography>
+                    </Box>
+                  ) : filteredNotes.length === 0 ? (
                     <NoteEmpty />
+                  ) : (
+                    filteredNotes.map((note, index) => (
+                      <NoteCard
+                        key={note.id}
+                        note={note}
+                        index={index}
+                        onGenerateAITags={handleGenerateAITagsForNote}
+                        onEditNote={handleRequestNoteEdit}
+                        onDeleteNote={handleRequestNoteDeletion}
+                        onDeleteNoteSummary={handleDeleteNoteSummary}
+                        aiLoading={isAiGeneratingForNoteId}
+                      />
+                    ))
                   )}
-                  {notes.map((note, index) => (
-                    <NoteCard
-                      key={note.id}
-                      note={note}
-                      index={index}
-                      onGenerateAITags={handleGenerateAITagsForNote}
-                      onEditNote={handleRequestNoteEdit}
-                      onDeleteNote={handleRequestNoteDeletion}
-                      onDeleteNoteSummary={handleDeleteNoteSummary}
-                      aiLoading={isAiGeneratingForNoteId}
-                    />
-                  ))}
                 </>
               )
               }
