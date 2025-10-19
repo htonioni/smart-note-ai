@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Note } from '../types/note'
-import { Box, Stack, Typography, Skeleton, Container } from '@mui/material';
+import { Box, Stack, Typography, Container } from '@mui/material';
 import NoteEmpty from './components/NoteEmpty';
 import CreateNoteForm from './components/CreateNoteForm'
 import NoteCard from './components/NoteCard';
@@ -9,6 +9,8 @@ import EditNoteModal from './components/EditNoteModal';
 import DeleteNoteModal from './components/DeleteNoteModal';
 import SearchBar from './components/SearchBar';
 import NoteCardSkeleton from './components/NoteCardSkeleton';
+import Image from 'next/image'
+import Underline from '../../public/assets/underline.svg';
 
 export default function Home() {
   // core notes
@@ -67,7 +69,6 @@ export default function Home() {
   }, [searchQuery, notes])
 
   // Handle note creation with optional AI tag generation
-  // revisao: adicionar um loading ao botao de enviar
   const handleCreateNote = async (
     title: string,
     body: string,
@@ -220,7 +221,6 @@ export default function Home() {
     }
   }
 
-  // revisao: adicionar loading para deletion
   const handleDeleteNoteSummary = async (noteId: number) => {
     setIsDeletingSummaryForNoteId(noteId);
     try {
@@ -273,12 +273,33 @@ export default function Home() {
               letterSpacing: '-1px',
               fontSize: { xs: '3rem', md: '4rem', lg: '4.5rem' },
               lineHeight: 1.1,
-              fontFamily: 'var(--font-lexend)'
+              fontFamily: 'var(--font-lexend)',
+              position: 'relative'
             }}
           >
             Smart
-            <Box component="span" sx={{ color: '#f87171' }}>
+            <Box
+              component="span"
+              sx={{
+                color: '#f87171',
+                position: 'relative',
+                display: 'inline-block'
+              }}
+            >
               Note
+              <Image
+                src={Underline}
+                alt=""
+                width={100}
+                height={20}
+                style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: '85%',
+                  width: '100%',
+                  height: 'auto',
+                }}
+              />
             </Box>
             {' '}AI
           </Typography>
@@ -321,6 +342,7 @@ export default function Home() {
                   <NoteCardSkeleton index={0} />
                   <NoteCardSkeleton index={1} />
                   <NoteCardSkeleton index={2} />
+                  <NoteCardSkeleton index={3} />
                 </>
               ) : (
                 <>
