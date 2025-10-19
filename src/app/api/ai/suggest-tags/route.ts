@@ -7,6 +7,21 @@ async function generateTagsAndSummary(title: string, body: string) {
     const prompt = `
         Analyze this note and provide:
         1. Exactly 3-4 relevant tags (single words , lowercase, no special characters)
+        2. A summary in Englishe explaining what is the intention of that note. Give it a context to a person that want to easily know what that note is about. One to two sentences are great. (212 characters maximum, including all letters, spaces, and punctuation marks.)
+
+        Note Title: "${title}"
+        Note Content: "${body}"
+
+        Return ONLY a JSON object in this exact format:
+        {
+            "tags": ["tag1", "tag2", "tag3", "tag4"],
+            "summary": "First sentence. Second sentence. Third sentence."
+        }
+    `;
+
+    const promptOG = `
+        Analyze this note and provide:
+        1. Exactly 3-4 relevant tags (single words , lowercase, no special characters)
         2. A 3-sentence summary in English
 
         Note Title: "${title}"

@@ -20,14 +20,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 }
 
 // PUT /api/notes/[id]
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     // this is the data from the sent request
     const { title, body, tags } = await request.json();
+    const { id } = await params;
 
     const { data, error } = await supabase
         .from('notes')
         .update({ title, body, tags })
-        .eq('id', params.id)
+        .eq('id', id)
         .select()
         .single()
 

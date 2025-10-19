@@ -10,6 +10,7 @@ interface NoteCardProps {
     onGenerateAITags: (noteId: number) => void;
     onEditNote: (note: Note) => void;
     onDeleteNote: (note: Note) => void;
+    onDeleteNoteSummary: (noteId: number) => void;
     aiLoading: number | null;
 }
 
@@ -19,6 +20,7 @@ const NoteCard = ({
     onGenerateAITags,
     onEditNote,
     onDeleteNote,
+    onDeleteNoteSummary,
     aiLoading
 }: NoteCardProps) => {
     return (
@@ -80,6 +82,65 @@ const NoteCard = ({
                                         />
                                     ))}
                                 </Stack>
+                            </Box>
+                        )}
+                        {note.summary && (
+                            <Box sx={{
+                                mt: 2,
+                                mb: 2,
+                                px: 2.5,
+                                py: 1.5,
+                                bgcolor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                borderRadius: 2,
+                                position: 'relative',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    borderRadius: 2,
+                                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                                    backdropFilter: 'blur(10px)'
+                                }
+                            }}>
+                                <Box sx={{ position: 'relative', zIndex: 1 }}>
+                                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <Box sx={{ height: 20, mr: 1 }}>
+                                                <Typography sx={{ fontSize: '12px' }}>✨</Typography>
+                                            </Box>
+                                            <Typography
+                                                variant="subtitle2"
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    color: '#4c1d95',
+                                                    fontSize: '0.85rem',
+                                                    letterSpacing: '0.5px'
+                                                }}
+                                            >
+                                                AI Summary
+                                            </Typography>
+                                        </Box>
+                                        <Box>
+                                            <IconButton onClick={() => onDeleteNoteSummary(note.id)}>
+                                                <ClearIcon fontSize='small' />
+                                            </IconButton>
+                                        </Box>
+                                    </Box>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            color: '#1e293b',
+                                            lineHeight: 1.6,
+                                            fontSize: '0.9rem',
+                                            fontWeight: 500,
+                                        }}
+                                    >
+                                        {note.summary}
+                                    </Typography>
+                                </Box>
                             </Box>
                         )}
                         <Typography

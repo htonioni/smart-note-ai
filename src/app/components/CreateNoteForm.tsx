@@ -117,7 +117,8 @@ const CreateNoteForm = ({ onSubmit }: CreateNoteFormProps) => {
                         />
                         <FormControlLabel
                             control={<Checkbox checked={aiEnabled} onChange={(e) => setAiEnabled(e.target.checked)} />}
-                            label="Auto generate AI tags"
+                            // revisao: checkbox feia
+                            label="Auto generate AI tags and summary"
                         />
                         <Button
                             type="submit"

@@ -115,7 +115,7 @@ export default function Home() {
   const handleConfirmNoteDeletion = async (noteId: number) => {
     setIsDeletingNote(true)
     try {
-      const response = await fetch(`/api/notes/${noteId}`, {method: 'DELETE',})
+      const response = await fetch(`/api/notes/${noteId}`, { method: 'DELETE', })
 
       if (response.ok) {
         setNotes(notes.filter(n => n.id !== noteId));
@@ -139,7 +139,7 @@ export default function Home() {
 
   const handleRequestNoteEdit = (note: Note) => {
     setSelectedNoteForEditing(note);
-    setIsEditModalOpen(true);  
+    setIsEditModalOpen(true);
   };
 
   const handleGenerateAITagsForNote = async (noteId: number) => {
@@ -154,14 +154,15 @@ export default function Home() {
         body: JSON.stringify({
           id: note.id,
           title: note.title,
-          body: note.body
+          body: note.body,
+          summary: note.summary
         })
       })
 
       const result = await response.json();
 
       if (result.success) {
-        const updatedNote = { ...note, tags: result.data.tags };
+        const updatedNote = { ...note, tags: result.data.tags, summary: result.data.summary };
 
         await fetch(`/api/notes/${noteId}`, {
           method: 'PUT',
@@ -171,13 +172,41 @@ export default function Home() {
 
         setNotes(notes.map(n => n.id === noteId ? updatedNote : n));
 
-        alert(`Generated tags: ${result.data.tags.join(', ')}`);
+        alert(`Generated tags: ${result.data.tags.join(', ')}\nGenerated Summary:\n${result.data.summary}`);
       }
     } catch (error) {
       console.error('Error generating AI tags:', error);
       alert('Failed to generate AI tags');
     } finally {
       setIsAiGeneratingForNoteId(null)
+    }
+  }
+
+  // revisao: adicionar loading para deletion
+  const handleDeleteNoteSummary = async (noteId: number) => {
+    try {
+      const note = notes.find(n => n.id === noteId);
+      if (!note) return;
+
+      const updatedNote = { ...note, summary: null };
+
+      // update in db
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedNote),
+      })
+
+      if (response.ok) {
+        // update local state
+        setNotes(notes.map(n => n.id === noteId ? updatedNote : n));
+      } else {
+        alert('Error deleting summary');
+      }
+
+    } catch (error) {
+      console.error('Error deleting summary');
+      alert('Error deleting summary');
     }
   }
 
@@ -259,6 +288,7 @@ export default function Home() {
                       onGenerateAITags={handleGenerateAITagsForNote}
                       onEditNote={handleRequestNoteEdit}
                       onDeleteNote={handleRequestNoteDeletion}
+                      onDeleteNoteSummary={handleDeleteNoteSummary}
                       aiLoading={isAiGeneratingForNoteId}
                     />
                   ))}
