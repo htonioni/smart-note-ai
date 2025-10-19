@@ -3,6 +3,7 @@ import { Box, Card, CardContent, Chip, IconButton, Stack, Typography } from "@mu
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
+import { getRelativeTime } from "@/utils/dateUtils";
 
 interface NoteCardProps {
     note: Note;
@@ -191,6 +192,18 @@ const NoteCard = ({
                             fontSize='small'
                         />
                     </IconButton>
+                </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <Typography
+                        variant="caption"
+                        sx={{
+                            color: '#64748b',
+                            fontSize: '0.75rem',
+                            fontStyle: 'italic',
+                        }}
+                    >
+                        {getRelativeTime(note.updatedAt)}
+                    </Typography>
                 </Box>
             </CardContent>
         </Card>

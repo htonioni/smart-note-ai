@@ -4,4 +4,5 @@ export type Note = {
   body: string;
   tags?: string[] | null;
   summary?: string | null;
+  updatedAt: string
 };

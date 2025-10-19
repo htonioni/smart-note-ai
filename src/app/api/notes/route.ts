@@ -7,7 +7,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from('notes')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('updatedAt', { ascending: false });
 
   if (error) {
     return Response.json({ error: error.message }, { status: 500 });
@@ -26,7 +26,13 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase
     .from('notes')
-    .insert([{ title, body, tags: tags || [], summary }])
+    .insert([{
+      title,
+      body,
+      tags: tags || [],
+      summary,
+      updatedAt: new Date().toISOString()
+    }])
     .select()
     .single();
 

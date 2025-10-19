@@ -22,12 +22,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 // PUT /api/notes/[id]
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     // this is the data from the sent request
-    const { title, body, tags } = await request.json();
+    const { title, body, tags, summary } = await request.json();
     const { id } = await params;
 
     const { data, error } = await supabase
         .from('notes')
-        .update({ title, body, tags })
+        .update({ 
+            title, 
+            body, 
+            tags, 
+            summary,
+            updatedAt: new Date().toISOString() 
+        })
         .eq('id', id)
         .select()
         .single()

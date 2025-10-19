@@ -48,7 +48,7 @@ export default function Home() {
     }
 
     const query = searchQuery.toLowerCase()
-    
+
     const filtered = notes.filter(note => {
       const titleMatch = note.title.toLowerCase().includes(query);
       const bodyMatch = note.body.toLowerCase().includes(query);
@@ -298,6 +298,7 @@ export default function Home() {
               Your Notes
             </Typography>
             <Stack spacing={2}>
+              {/* guard case */}
               {isLoadingNotes ? (
                 <>
                   <Skeleton variant='rectangular' animation="wave" height={100} />
@@ -306,14 +307,15 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <SearchBar 
+                  <SearchBar
                     searchQuery={searchQuery}
                     onSearchChange={setSearchQuery}
                     resultsCount={filteredNotes.length}
                   />
+                  {/* conditional rendering */}
                   {filteredNotes.length === 0 && searchQuery.trim() ? (
-                    <Box sx={{ 
-                      textAlign: 'center', 
+                    <Box sx={{
+                      textAlign: 'center',
                       py: 4,
                       color: '#64748b'
                     }}>
