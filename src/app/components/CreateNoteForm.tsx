@@ -116,11 +116,49 @@ const CreateNoteForm = ({ onSubmit, isLoading = false }: CreateNoteFormProps) =>
                                 }
                             }}
                         />
-                        <FormControlLabel
-                            control={<Checkbox checked={aiEnabled} onChange={(e) => setAiEnabled(e.target.checked)} />}
-                            // revisao: checkbox feia
-                            label="Auto generate AI tags and summary"
-                        />
+                        {/* Button 1: Switch-style Toggle */}
+                        <Box sx={{ mb: 2 }}>
+                            <Box
+                                onClick={() => setAiEnabled(!aiEnabled)}
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    gap: 2
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        width: 50,
+                                        height: 26,
+                                        borderRadius: 13,
+                                        bgcolor: aiEnabled ? '#075985' : '#e2e8f0',
+                                        position: 'relative',
+                                        transition: 'all 0.3s ease',
+                                        '&:hover': {
+                                            bgcolor: aiEnabled ? '#075985' : '#cbd5e0'
+                                        }
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: 22,
+                                            height: 22,
+                                            borderRadius: '50%',
+                                            bgcolor: 'white',
+                                            position: 'absolute',
+                                            top: 2,
+                                            left: aiEnabled ? 26 : 2,
+                                            transition: 'all 0.3s ease',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                                        }}
+                                    />
+                                </Box>
+                                <Typography variant="body2" sx={{ color: '#4a5568' }}>
+                                    AI Enabled
+                                </Typography>
+                            </Box>
+                        </Box>
                         <Button
                             // revisao: add note to the beggingin of the array
                             type="submit"

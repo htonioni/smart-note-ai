@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
     Dialog,
-    DialogTitle,
     DialogContent,
     DialogActions,
     Button,
@@ -27,7 +26,7 @@ const EditNoteModal = ({
     open,
     note,
     onClose,
-    onSave, 
+    onSave,
     saving
 }: EditNoteModalProps) => {
 
@@ -37,13 +36,13 @@ const EditNoteModal = ({
     const [editTagInput, setEditTagInput] = useState('');
 
     useEffect(() => {
-        if (note) {
+        if (note && open) {  // Add 'open' dependency to ensure it runs when modal opens
             setEditTitle(note.title);
             setEditBody(note.body);
             setEditTags(note.tags || [])
             setEditTagInput('');
         }
-    }, [note])
+    }, [note, open])  // Add 'open' as dependency
 
 
     // Tag management functions
@@ -80,101 +79,235 @@ const EditNoteModal = ({
     };
 
     const handleClose = () => {
-        setEditTitle('');
-        setEditBody('');
-        setEditTags([]);
-        setEditTagInput('');
         onClose();
+        // Clear state after a small delay to avoid race conditions
+        setTimeout(() => {
+            setEditTitle('');
+            setEditBody('');
+            setEditTags([]);
+            setEditTagInput('');
+        }, 100);
     };
 
     return (
-        <Dialog open={open} onClose={handleClose}>
-            <DialogTitle>Edit Note</DialogTitle>
-            <DialogContent>
-                <TextField
-                    label='Title'
-                    value={editTitle}
-                    onChange={e => setEditTitle(e.target.value)}
-                    fullWidth
-                    margin='dense'
-                />
-                <TextField
-                    label='Content'
-                    value={editBody}
-                    onChange={e => setEditBody(e.target.value)}
-                    fullWidth
-                    margin='dense'
-                    multiline
-                    rows={4}
-                />
+        <Dialog
+            open={open}
+            onClose={handleClose}
+            maxWidth="sm"
+            fullWidth
+            slotProps={{
+                paper: {
+                    sx: {
+                        borderRadius: 3,
+                        margin: 2,
+                        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                        border: '1px solid #f1f5f9',
+                    }
+                }
+            }}
+            sx={{
+                '& .MuiBackdrop-root': {
+                    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+                }
+            }}
+        >
+            <DialogContent sx={{
+                px: 3
+            }}>
+                {/* Custom Title */}
+                <Typography
+                    variant="h6"
+                    sx={{
+                        fontSize: '1.1rem',
+                        fontWeight: 600,
+                        color: '#0f172a',
+                        pb: 2,
+                    }}>
+                    Edit Note
+                </Typography>
 
-                {/* tags Section */}
-                <Box sx={{ mt: 2 }}>
-                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                        Tags
-                    </Typography>
-
-                    {/* Display existing tags as deletable chips */}
-                    {editTags.length > 0 && (
-                        <Box sx={{ mb: 2 }}>
-                            <Stack direction="row" spacing={1} flexWrap="wrap">
-                                {editTags.map((tag, index) => (
-                                    <Chip
-                                        key={index}
-                                        label={tag}
-                                        onDelete={() => handleRemoveTag(tag)}
-                                        size="small"
-                                        sx={{
-                                            bgcolor: '#e3f2fd',
-                                            color: '#1976d2',
-                                            fontSize: '0.75rem',
-                                            mb: 0.5,
-                                            '& .MuiChip-deleteIcon': {
-                                                color: '#1976d2',
-                                                '&:hover': {
-                                                    color: '#d32f2f'
-                                                }
-                                            }
-                                        }}
-                                    />
-                                ))}
-                            </Stack>
-                        </Box>
-                    )}
-                    {/* input for new tags */}
+                <Stack spacing={3}>
                     <TextField
-                        label='Add new tag'
-                        value={editTagInput}
-                        onChange={e => setEditTagInput(e.target.value)}
-                        onKeyPress={handleTagInputKeyPress}
-                        onBlur={() => {
-                            if (editTagInput.trim()) {
-                                handleAddTag(editTagInput);
-                            }
-                        }}
+                        label='Title'
+                        value={editTitle}
+                        onChange={e => setEditTitle(e.target.value)}
                         fullWidth
-                        margin='dense'
-                        size="small"
-                        helperText="Press Enter or comma to add tag"
+                        variant="outlined"
                         sx={{
                             '& .MuiOutlinedInput-root': {
-                                borderRadius: 1
+                                borderRadius: 2,
+                                '& fieldset': {
+                                    borderColor: '#e2e8f0'
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: '#cbd5e0',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: '#075985',
+                                    borderWidth: 2
+                                }
+                            },
+                            '& .MuiInputLabel-root': {
+                                color: '#64748b',
+                                '&.Mui-focused': {
+                                    color: '#075985'
+                                }
                             }
                         }}
                     />
-                </Box>
+
+                    <TextField
+                        label='Content'
+                        value={editBody}
+                        onChange={e => setEditBody(e.target.value)}
+                        fullWidth
+                        multiline
+                        rows={4}
+                        variant="outlined"
+                        sx={{
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                                '& fieldset': {
+                                    borderColor: '#e2e8f0'
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: '#cbd5e0',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: '#075985',
+                                    borderWidth: 2
+                                }
+                            },
+                            '& .MuiInputLabel-root': {
+                                color: '#64748b',
+                                '&.Mui-focused': {
+                                    color: '#075985'
+                                }
+                            }
+                        }}
+                    />
+
+                    {/* Clean Tags Section */}
+                    <Box>
+                        <Typography variant="body2" sx={{
+                            color: '#64748b',
+                            mb: 2,
+                            fontWeight: 500
+                        }}>
+                            Tags
+                        </Typography>
+
+                        {/* Display existing tags */}
+                        {editTags.length > 0 && (
+                            <Box sx={{ mb: 2 }}>
+                                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                    {editTags.map((tag, index) => (
+                                        <Chip
+                                            key={index}
+                                            label={tag}
+                                            onDelete={() => handleRemoveTag(tag)}
+                                            size="small"
+                                            sx={{
+                                                bgcolor: '#f8f9fa',
+                                                color: '#0f172a',
+                                                border: '1px solid #e2e8f0',
+                                                fontSize: '0.8rem',
+                                                mb: 0.5,
+                                                '& .MuiChip-deleteIcon': {
+                                                    color: '#64748b',
+                                                    '&:hover': {
+                                                        color: '#ef4444'
+                                                    }
+                                                }
+                                            }}
+                                        />
+                                    ))}
+                                </Stack>
+                            </Box>
+                        )}
+
+                        <TextField
+                            label='Add new tag'
+                            value={editTagInput}
+                            onChange={e => setEditTagInput(e.target.value)}
+                            onKeyPress={handleTagInputKeyPress}
+                            onBlur={() => {
+                                if (editTagInput.trim()) {
+                                    handleAddTag(editTagInput);
+                                }
+                            }}
+                            fullWidth
+                            size="small"
+                            helperText="Press Enter or comma to add tag"
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: 2,
+                                    '& fieldset': {
+                                        borderColor: '#e2e8f0'
+                                    },
+                                    '&:hover fieldset': {
+                                        borderColor: '#cbd5e0',
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: '#075985'
+                                    }
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: '#64748b',
+                                    '&.Mui-focused': {
+                                        color: '#075985'
+                                    }
+                                }
+                            }}
+                        />
+                    </Box>
+                </Stack>
             </DialogContent>
-            <DialogActions>
-                <Button onClick={handleClose}>
+
+            <DialogActions sx={{
+                p: 3,
+                pt: 1,
+                gap: 2,
+            }}>
+                <Button
+                    onClick={handleClose}
+                    sx={{
+                        borderRadius: 2,
+                        px: 3,
+                        py: 1,
+                        color: '#64748b',
+                        bgcolor: '#f8f9fa',
+                        fontWeight: 500,
+                        textTransform: 'none',
+                        border: '1px solid #e2e8f0',
+                        '&:hover': {
+                            bgcolor: '#f1f5f9',
+                        }
+                    }}
+                >
                     Cancel
                 </Button>
                 <Button
                     onClick={handleSave}
-                    variant='contained'
                     disabled={saving}
-                    endIcon={saving ? <CircularProgress size={20} /> : null}
+                    endIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
+                    sx={{
+                        borderRadius: 2,
+                        px: 3,
+                        py: 1,
+                        bgcolor: '#0f172a',
+                        color: 'white',
+                        fontWeight: 500,
+                        textTransform: 'none',
+                        '&:hover': {
+                            bgcolor: '#1e293b',
+                        },
+                        '&:disabled': {
+                            bgcolor: '#64748b',
+                        }
+                    }}
                 >
-                    Save
+                    {saving ? 'Saving...' : 'Save'}
                 </Button>
             </DialogActions>
         </Dialog>
