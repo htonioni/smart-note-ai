@@ -9,6 +9,7 @@ import EditNoteModal from './components/EditNoteModal';
 import DeleteNoteModal from './components/DeleteNoteModal';
 import SearchBar from './components/SearchBar';
 import NoteCardSkeleton from './components/NoteCardSkeleton';
+import ScrollToTop from './components/ScrollToTop';
 import Image from 'next/image'
 import Underline from '../../public/assets/underline.svg';
 
@@ -402,6 +403,7 @@ export default function Home() {
         onConfirmDelete={handleConfirmNoteDeletion}
         deleting={isDeletingNote}
       />
+      <ScrollToTop />
     </Box>
   );
 }
