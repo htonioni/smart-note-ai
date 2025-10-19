@@ -8,11 +8,12 @@ import NoteCard from './components/NoteCard';
 import EditNoteModal from './components/EditNoteModal';
 import DeleteNoteModal from './components/DeleteNoteModal';
 import SearchBar from './components/SearchBar';
+import NoteCardSkeleton from './components/NoteCardSkeleton';
 
 export default function Home() {
   // core notes
   const [notes, setNotes] = useState<Note[]>([]);
-  
+
   // fetching data
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
   const [isAiGeneratingForNoteId, setIsAiGeneratingForNoteId] = useState<number | null>(null);
@@ -294,7 +295,7 @@ export default function Home() {
           }}
         >
           {/* create note section */}
-          <CreateNoteForm onSubmit={handleCreateNote} isLoading={isCreatingNote}/>
+          <CreateNoteForm onSubmit={handleCreateNote} isLoading={isCreatingNote} />
 
           {/* List note section */}
           <Box sx={{ flex: 1 }}>
@@ -309,20 +310,20 @@ export default function Home() {
               Your Notes
             </Typography>
             <Stack spacing={2}>
+              <SearchBar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                resultsCount={filteredNotes.length}
+              />
               {/* guard case */}
               {isLoadingNotes ? (
                 <>
-                  <Skeleton variant='rectangular' animation="wave" height={100} />
-                  <Skeleton variant='rectangular' animation="wave" height={100} />
-                  <Skeleton variant='rectangular' animation="wave" height={100} />
+                  <NoteCardSkeleton index={0} />
+                  <NoteCardSkeleton index={1} />
+                  <NoteCardSkeleton index={2} />
                 </>
               ) : (
                 <>
-                  <SearchBar
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    resultsCount={filteredNotes.length}
-                  />
                   {/* conditional rendering */}
                   {filteredNotes.length === 0 && searchQuery.trim() ? (
                     <Box sx={{
