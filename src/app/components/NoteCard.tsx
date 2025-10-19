@@ -1,5 +1,5 @@
 import { Note } from "@/types/note";
-import { Box, Card, CardContent, Chip, IconButton, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Chip, CircularProgress, IconButton, Stack, Typography } from "@mui/material";
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -13,6 +13,7 @@ interface NoteCardProps {
     onDeleteNote: (note: Note) => void;
     onDeleteNoteSummary: (noteId: number) => void;
     aiLoading: number | null;
+    summaryDeleteLoading: number | null;
 }
 
 const NoteCard = ({
@@ -22,7 +23,8 @@ const NoteCard = ({
     onEditNote,
     onDeleteNote,
     onDeleteNoteSummary,
-    aiLoading
+    aiLoading,
+    summaryDeleteLoading
 }: NoteCardProps) => {
     return (
         <Card
@@ -91,7 +93,7 @@ const NoteCard = ({
                                 mb: 2,
                                 px: 2.5,
                                 py: 1.5,
-                                bgcolor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                bgcolor: 'linear-gradient(135deg, #ff7e7e 0%, #e53e3e 100%)',
                                 borderRadius: 2,
                                 position: 'relative',
                                 '&::before': {
@@ -102,7 +104,7 @@ const NoteCard = ({
                                     right: 0,
                                     bottom: 0,
                                     borderRadius: 2,
-                                    background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                                    background: 'linear-gradient(135deg, rgba(255, 126, 126, 0.1) 0%, rgba(229, 62, 62, 0.1) 100%)',
                                     backdropFilter: 'blur(10px)'
                                 }
                             }}>
@@ -116,7 +118,7 @@ const NoteCard = ({
                                                 variant="subtitle2"
                                                 sx={{
                                                     fontWeight: 600,
-                                                    color: '#4c1d95',
+                                                    color: '#f87171',
                                                     fontSize: '0.85rem',
                                                     letterSpacing: '0.5px'
                                                 }}
@@ -125,8 +127,15 @@ const NoteCard = ({
                                             </Typography>
                                         </Box>
                                         <Box>
-                                            <IconButton onClick={() => onDeleteNoteSummary(note.id)}>
-                                                <ClearIcon fontSize='small' />
+                                            <IconButton
+                                                onClick={() => onDeleteNoteSummary(note.id)}
+                                                disabled={summaryDeleteLoading === note.id}
+                                            >
+                                                {summaryDeleteLoading === note.id ? (
+                                                    <CircularProgress size={16} sx={{ color: '#f87171' }} />
+                                                ) : (
+                                                    <ClearIcon fontSize='small' />
+                                                )}
                                             </IconButton>
                                         </Box>
                                     </Box>
@@ -158,22 +167,16 @@ const NoteCard = ({
                     </Box>
                     <IconButton
                         onClick={() => onGenerateAITags(note.id)}
-                        // revisao: cores e icones
-                        sx={{
-                            bgcolor: aiLoading === note.id ? '#f5f5f5' : 'linear-gradient(45deg, #9c27b0, #673ab7)',
-                            '&:hover': { bgcolor: aiLoading === note.id ? '#f5f5f5' : '#f8717180' }
-                        }}
+                        disabled={aiLoading === note.id}
                     >
-                        <AutoAwesomeIcon />
+                        {aiLoading === note.id ? (
+                            <CircularProgress size={22} color="inherit" />
+                        ) : (
+                            <AutoAwesomeIcon />
+                        )}
                     </IconButton>
                     <IconButton
                         onClick={() => onEditNote(note)}
-                        sx={{
-                            '&:hover': {
-                                bgcolor: '#0678b790',
-                                color: '#045683'
-                            }
-                        }}
                     >
                         <EditIcon
                             fontSize='small'

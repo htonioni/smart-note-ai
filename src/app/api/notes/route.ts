@@ -3,7 +3,6 @@ import { supabase } from '../supabaseClient';
 
 // GET /api/notes
 export async function GET() {
-  // revisao: add 'updated at' column to the table.
   const { data, error } = await supabase
     .from('notes')
     .select('*')

@@ -12,13 +12,15 @@ import SearchBar from './components/SearchBar';
 export default function Home() {
   // core notes
   const [notes, setNotes] = useState<Note[]>([]);
-
+  
   // fetching data
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
-  const [isAiGeneratingForNoteId, setIsAiGeneratingForNoteId] = useState<number | null>(null)
+  const [isAiGeneratingForNoteId, setIsAiGeneratingForNoteId] = useState<number | null>(null);
+  const [isCreatingNote, setIsCreatingNote] = useState(false);
+  const [isDeletingSummaryForNoteId, setIsDeletingSummaryForNoteId] = useState<number | null>(null);
 
   // modals state management
-  const [selectedNoteForDeletion, setSelectedNoteForDeletion] = useState<Note | null>(null)
+  const [selectedNoteForDeletion, setSelectedNoteForDeletion] = useState<Note | null>(null);
   const [selectedNoteForEditing, setSelectedNoteForEditing] = useState<Note | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -70,6 +72,7 @@ export default function Home() {
     body: string,
     aiEnabled: boolean
   ) => {
+    setIsCreatingNote(true);
 
     let generatedTags = null
     let generatedSummary = null
@@ -98,22 +101,29 @@ export default function Home() {
       }
     }
 
-    const noteCreationResponse = await fetch('/api/notes', {
-      method: "POST",
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: title.trim(),
-        body: body.trim(),
-        tags: generatedTags,
-        summary: generatedSummary,
+    try {
+      const noteCreationResponse = await fetch('/api/notes', {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: title.trim(),
+          body: body.trim(),
+          tags: generatedTags,
+          summary: generatedSummary,
+        })
       })
-    })
 
-    if (noteCreationResponse.ok) {
-      const newNote = await noteCreationResponse.json();
-      setNotes([...notes, newNote]);
-    } else {
-      alert('Error on add note.')
+      if (noteCreationResponse.ok) {
+        const newNote = await noteCreationResponse.json();
+        setNotes([...notes, newNote]);
+      } else {
+        alert('Error on add note.')
+      }
+    } catch (error) {
+      console.error('Error creating note: ', error);
+      alert('Error creating note.')
+    } finally {
+      setIsCreatingNote(false);
     }
   };
 
@@ -200,8 +210,6 @@ export default function Home() {
         });
 
         setNotes(notes.map(n => n.id === noteId ? updatedNote : n));
-
-        alert(`Generated tags: ${result.data.tags.join(', ')}\nGenerated Summary:\n${result.data.summary}`);
       }
     } catch (error) {
       console.error('Error generating AI tags:', error);
@@ -213,6 +221,7 @@ export default function Home() {
 
   // revisao: adicionar loading para deletion
   const handleDeleteNoteSummary = async (noteId: number) => {
+    setIsDeletingSummaryForNoteId(noteId);
     try {
       const note = notes.find(n => n.id === noteId);
       if (!note) return;
@@ -236,6 +245,8 @@ export default function Home() {
     } catch (error) {
       console.error('Error deleting summary');
       alert('Error deleting summary');
+    } finally {
+      setIsDeletingSummaryForNoteId(null);
     }
   }
 
@@ -283,7 +294,7 @@ export default function Home() {
           }}
         >
           {/* create note section */}
-          <CreateNoteForm onSubmit={handleCreateNote} />
+          <CreateNoteForm onSubmit={handleCreateNote} isLoading={isCreatingNote}/>
 
           {/* List note section */}
           <Box sx={{ flex: 1 }}>
@@ -339,6 +350,7 @@ export default function Home() {
                         onDeleteNote={handleRequestNoteDeletion}
                         onDeleteNoteSummary={handleDeleteNoteSummary}
                         aiLoading={isAiGeneratingForNoteId}
+                        summaryDeleteLoading={isDeletingSummaryForNoteId}
                       />
                     ))
                   )}

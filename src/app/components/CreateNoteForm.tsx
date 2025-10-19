@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Box, Button, Checkbox, FormControlLabel, Paper, Stack, TextField, Typography } from "@mui/material"
+import { Box, Button, Checkbox, FormControlLabel, Paper, Stack, TextField, Typography, CircularProgress } from "@mui/material"
 
 interface CreateNoteFormProps {
     onSubmit: (title: string, body: string, aiEnabled: boolean) => void;
+    isLoading: boolean;
 }
 
-const CreateNoteForm = ({ onSubmit }: CreateNoteFormProps) => {
+const CreateNoteForm = ({ onSubmit, isLoading = false }: CreateNoteFormProps) => {
 
     // creating note states
     const [title, setTitle] = useState('');
@@ -121,9 +122,12 @@ const CreateNoteForm = ({ onSubmit }: CreateNoteFormProps) => {
                             label="Auto generate AI tags and summary"
                         />
                         <Button
+                            // revisao: add note to the beggingin of the array
                             type="submit"
                             variant="contained"
                             size="large"
+                            disabled={isLoading}
+                            endIcon={isLoading ? <CircularProgress color='inherit' size={20} /> : null}
                             sx={{
                                 borderRadius: 2,
                                 py: 1.75,
@@ -139,7 +143,7 @@ const CreateNoteForm = ({ onSubmit }: CreateNoteFormProps) => {
                                 }
                             }}
                         >
-                            Add Note
+                            {isLoading ? 'Creating ...' : 'Add Note'}
                         </Button>
                     </Stack>
                 </form>
