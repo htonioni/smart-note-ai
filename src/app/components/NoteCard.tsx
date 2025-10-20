@@ -28,7 +28,6 @@ const NoteCard = ({
 }: NoteCardProps) => {
     return (
         <Card
-            key={note.id}
             elevation={1}
             sx={{
                 bgcolor: '#fff',

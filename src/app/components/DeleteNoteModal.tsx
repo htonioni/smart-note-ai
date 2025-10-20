@@ -63,7 +63,7 @@ const DeleteNoteModal = ({
                     }}
                 >
                     Are you sure you want to delete this note?
-                    <Typography component="p" sx={{ fontWeight: 600 }}>
+                    <Typography component="span" sx={{ fontWeight: 600, display: 'block', mt: 1 }}>
                         {note?.title}
                     </Typography>
                 </Typography>

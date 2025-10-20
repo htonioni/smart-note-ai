@@ -2,12 +2,10 @@ export function formatDate(dateString: string): string {
   try {
     const date = new Date(dateString);
     
-    // Check if date is valid
     if (isNaN(date.getTime())) {
       return 'Invalid date';
     }
     
-    // Format as MM/DD/YYYY
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: '2-digit',
@@ -30,7 +28,6 @@ export function getRelativeTime(dateString: string): string {
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInHours < 24) return `${diffInHours}h ago`;
-    // if (diffInDays < 2) return `${diffInDays}d ago`;
     
     return formatDate(dateString);
   } catch (error) {

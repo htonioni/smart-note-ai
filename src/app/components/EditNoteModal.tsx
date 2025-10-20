@@ -36,16 +36,15 @@ const EditNoteModal = ({
     const [editTagInput, setEditTagInput] = useState('');
 
     useEffect(() => {
-        if (note && open) {  // Add 'open' dependency to ensure it runs when modal opens
+        if (note && open) {
             setEditTitle(note.title);
             setEditBody(note.body);
             setEditTags(note.tags || [])
             setEditTagInput('');
         }
-    }, [note, open])  // Add 'open' as dependency
+    }, [note, open])
 
 
-    // Tag management functions
     const handleAddTag = (tagToAdd: string) => {
         const trimmedTag = tagToAdd.trim();
         if (trimmedTag && !editTags.includes(trimmedTag)) {
@@ -80,7 +79,6 @@ const EditNoteModal = ({
 
     const handleClose = () => {
         onClose();
-        // Clear state after a small delay to avoid race conditions
         setTimeout(() => {
             setEditTitle('');
             setEditBody('');

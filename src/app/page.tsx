@@ -15,6 +15,7 @@ import Underline from '../assets/underline.svg';
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
+  const [filteredNotes, setFilteredNotes] = useState<Note[]>([])
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
   const [isCreatingNote, setIsCreatingNote] = useState(false);
   const [isAiGeneratingForNoteId, setIsAiGeneratingForNoteId] = useState<number | null>(null);
@@ -26,9 +27,8 @@ export default function Home() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeletingNote, setIsDeletingNote] = useState(false);
   const [isSavingNote, setIsSavingNote] = useState(false);
-
   const [searchQuery, setSearchQuery] = useState('')
-  const [filteredNotes, setFilteredNotes] = useState<Note[]>([])
+
 
   const loadInitialNotes = async () => {
     try {
@@ -357,7 +357,7 @@ export default function Home() {
                   ) : (
                     filteredNotes.map((note, index) => (
                       <NoteCard
-                        key={note.id}
+                        key={`${note.id}-${note.updatedAt}`}
                         note={note}
                         index={index}
                         onGenerateAITags={handleGenerateAITagsForNote}

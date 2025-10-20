@@ -8,7 +8,6 @@ interface CreateNoteFormProps {
 
 const CreateNoteForm = ({ onSubmit, isLoading = false }: CreateNoteFormProps) => {
 
-    // creating note states
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [aiEnabled, setAiEnabled] = useState(false);
@@ -116,7 +115,6 @@ const CreateNoteForm = ({ onSubmit, isLoading = false }: CreateNoteFormProps) =>
                                 }
                             }}
                         />
-                        {/* Button 1: Switch-style Toggle */}
                         <Box sx={{ mb: 2 }}>
                             <Box
                                 onClick={() => setAiEnabled(!aiEnabled)}

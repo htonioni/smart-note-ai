@@ -6,7 +6,6 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 const ScrollToTop = () => {
     const [isVisible, setIsVisible] = useState(false);
 
-    // show button
     useEffect(() => {
         const toggleVisibility = () => {
             if (window.pageYOffset > 300) {
@@ -33,12 +32,12 @@ const ScrollToTop = () => {
                 onClick={scrollToTop}
                 sx={{
                     position: 'fixed',
-                    bottom: 32,
-                    left: 32,
+                    bottom: 40,
+                    right: 40,
                     bgcolor: '#0f172a',
                     color: 'white',
-                    width: 56,
-                    height: 56,
+                    width: 58,
+                    height: 58,
                     zIndex: 1000,
                     '&:hover': {
                         bgcolor: '#1e293b',
