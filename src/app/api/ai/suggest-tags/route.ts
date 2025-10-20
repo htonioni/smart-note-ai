@@ -7,30 +7,20 @@ async function generateTagsAndSummary(title: string, body: string) {
     const prompt = `
         Analyze this note and provide:
         1. Exactly 3-4 relevant tags (single words , lowercase, no special characters)
-        2. A summary in Englishe explaining what is the intention of that note. Give it a context to a person that want to easily know what that note is about. One to two sentences are great. (212 characters maximum, including all letters, spaces, and punctuation marks.)
+        2. A smart summary that explains WHY this note matters, what category it belongs to, or what the user is trying to achieve. DO NOT just repeat what's written - instead, provide insight about the note's purpose, urgency, or context. Keep it concise and valuable. (212 characters maximum, including all letters, spaces, and punctuation marks.)
 
         Note Title: "${title}"
         Note Content: "${body}"
 
-        Return ONLY a JSON object in this exact format:
-        {
-            "tags": ["tag1", "tag2", "tag3", "tag4"],
-            "summary": "First sentence. Second sentence. Third sentence."
-        }
-    `;
-
-    const promptOG = `
-        Analyze this note and provide:
-        1. Exactly 3-4 relevant tags (single words , lowercase, no special characters)
-        2. A 3-sentence summary in English
-
-        Note Title: "${title}"
-        Note Content: "${body}"
+        Examples of GOOD summaries:
+        - "Weekend productivity plan with home maintenance tasks and built-in motivation system"
+        - "Recipe collection for quick weeknight meals under 30 minutes" 
+        - "Meeting notes from Q4 planning session with action items for marketing team"
 
         Return ONLY a JSON object in this exact format:
         {
             "tags": ["tag1", "tag2", "tag3", "tag4"],
-            "summary": "First sentence. Second sentence. Third sentence."
+            "summary": "Insightful summary here."
         }
     `;
 
