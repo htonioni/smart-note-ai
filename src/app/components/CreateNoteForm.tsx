@@ -160,7 +160,6 @@ const CreateNoteForm = ({ onSubmit, isLoading = false }: CreateNoteFormProps) =>
                             </Box>
                         </Box>
                         <Button
-                            // revisao: add note to the beggingin of the array
                             type="submit"
                             variant="contained"
                             size="large"

@@ -118,7 +118,7 @@ export default function Home() {
 
       if (noteCreationResponse.ok) {
         const newNote = await noteCreationResponse.json();
-        setNotes([...notes, newNote]);
+        setNotes([newNote, ...notes]);
       } else {
         alert('Error on add note.')
       }
@@ -385,7 +385,6 @@ export default function Home() {
           </Box>
         </Box>
       </Container>
-      {/* revisao: dialog style */}
       <EditNoteModal
         note={selectedNoteForEditing}
         open={isEditModalOpen}
