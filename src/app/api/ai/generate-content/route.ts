@@ -1,6 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
 
-// client gets API key from the variable `GEMINI_API_KEY`.
 const ai = new GoogleGenAI({});
 
 async function generateTagsAndSummary(title: string, body: string) {
@@ -34,7 +33,6 @@ async function generateTagsAndSummary(title: string, body: string) {
             throw new Error('No response text from Gemini');
         }
         
-        // response text cleaner - remove markdown code blocks
         let cleanText = response.text.trim();
         if (cleanText.startsWith('```json')) {
             cleanText = cleanText.replace(/^```json\s*/, '').replace(/\s*```$/, '');
@@ -42,7 +40,6 @@ async function generateTagsAndSummary(title: string, body: string) {
             cleanText = cleanText.replace(/^```\s*/, '').replace(/\s*```$/, '');
         }
 
-        // parsing the response (into object)
         const aiResponse = JSON.parse(cleanText);
 
         return {
@@ -60,7 +57,6 @@ async function generateTagsAndSummary(title: string, body: string) {
 
 export async function POST(request: Request) {
     try {
-        // parse the JSON body from the request
         const body = await request.json();
         const { id, title, body: noteBody } = body;
         if (!title || !noteBody) {

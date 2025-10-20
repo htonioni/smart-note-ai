@@ -3,7 +3,7 @@
 
 A modern, full-stack note management application with intelligent AI-powered organization and beautiful user experience.
 
-![Homepage](./public/assets/project.png)
+![Homepage](./src/assets/project.png)
 
 ## About the Project
 
@@ -58,7 +58,7 @@ The project follows a modern full-stack architecture:
 3. **Supabase (PostgreSQL)** 
 4. **AI API (Gemini - GenAI)**
 
-![System Architecture](./public/assets/note-diagram.png)
+![System Architecture](./src/assets/note-diagram.png)
 
 ### Data Flow
 
