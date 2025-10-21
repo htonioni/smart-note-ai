@@ -10,10 +10,12 @@ import DeleteNoteModal from './components/DeleteNoteModal';
 import SearchBar from './components/SearchBar';
 import NoteCardSkeleton from './components/NoteCardSkeleton';
 import ScrollToTop from './components/ScrollToTop';
+import PasswordGate from './components/PasswordGate';
 import Image from 'next/image'
 import Underline from '../assets/underline.svg';
 
 export default function Home() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [filteredNotes, setFilteredNotes] = useState<Note[]>([])
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
@@ -29,6 +31,11 @@ export default function Home() {
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [searchQuery, setSearchQuery] = useState('')
 
+
+  useEffect(() => {
+    const authenticated = sessionStorage.getItem('gateAuthenticated') === 'true';
+    setIsAuthenticated(authenticated);
+  }, []);
 
   const loadInitialNotes = async () => {
     try {
@@ -251,15 +258,17 @@ export default function Home() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        bgcolor: '#f8f9fa',
-        py: 4,
-        px: 10,
-        color: '#0f172a'
-      }}
-    >
+    <>
+      {!isAuthenticated && <PasswordGate onSuccess={() => setIsAuthenticated(true)} />}
+      <Box
+        sx={{
+          minHeight: '100vh',
+          bgcolor: '#f8f9fa',
+          py: 4,
+          px: 10,
+          color: '#0f172a'
+        }}
+      >
       <Container maxWidth="xl">
         <Box sx={{ textAlign: 'center', mb: 5 }}>
           <Typography
@@ -393,6 +402,7 @@ export default function Home() {
         deleting={isDeletingNote}
       />
       <ScrollToTop />
-    </Box>
+      </Box>
+    </>
   );
 }
