@@ -1,9 +1,10 @@
 import { Note } from "@/types/note";
 import { Box, Card, CardContent, Chip, CircularProgress, IconButton, Stack, Typography } from "@mui/material";
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
 import { getRelativeTime } from "@/utils/dateUtils";
+import Image from 'next/image';
+import generativeIcon from '@/assets/generative.svg';
 
 interface NoteCardProps {
     note: Note;
@@ -167,11 +168,25 @@ const NoteCard = ({
                     <IconButton
                         onClick={() => onGenerateAI(note.id)}
                         disabled={aiLoading.has(note.id)}
+                        sx={{
+                            '&:hover img': {
+                                filter: 'grayscale(100%) brightness(0) opacity(0.8)'
+                            }
+                        }}
                     >
                         {aiLoading.has(note.id) ? (
                             <CircularProgress size={22} color="inherit" />
                         ) : (
-                            <AutoAwesomeIcon />
+                            <Image 
+                                src={generativeIcon}
+                                alt="Generate AI"
+                                width={24}
+                                height={24}
+                                style={{
+                                    filter: 'grayscale(100%) brightness(0) opacity(0.54)',
+                                    transition: 'filter 0.2s ease',
+                                }}
+                            />
                         )}
                     </IconButton>
                     <IconButton
