@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Box, Button, Checkbox, FormControlLabel, Paper, Stack, TextField, Typography, CircularProgress } from "@mui/material"
+import { Box, Button, Paper, Stack, TextField, Typography, CircularProgress } from "@mui/material"
 
 interface CreateNoteFormProps {
     onSubmit: (title: string, body: string, aiEnabled: boolean) => void;

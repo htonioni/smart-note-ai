@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Note } from '../types/note'
-import { Box, Stack, Typography, Container } from '@mui/material';
+import { Box, Stack, Typography, Container, Button } from '@mui/material';
 import NoteEmpty from './components/NoteEmpty';
 import CreateNoteForm from './components/CreateNoteForm'
 import NoteCard from './components/NoteCard';
@@ -10,6 +10,8 @@ import DeleteNoteModal from './components/DeleteNoteModal';
 import SearchBar from './components/SearchBar';
 import NoteCardSkeleton from './components/NoteCardSkeleton';
 import ScrollToTop from './components/ScrollToTop';
+import { ToastNotification } from './components/ToastNotification';
+import { Toast, showToast } from '../utils/toastUtils'
 import Image from 'next/image'
 import Underline from '../assets/underline.svg';
 
@@ -20,7 +22,6 @@ export default function Home() {
   const [isCreatingNote, setIsCreatingNote] = useState(false);
   const [isAiGeneratingNoteIds, setIsAiGeneratingNoteIds] = useState<Set<number>>(new Set());
   const [isDeletingSummaryNoteIds, setIsDeletingSummaryNoteIds] = useState<Set<number>>(new Set());
-
   const [selectedNoteForDeletion, setSelectedNoteForDeletion] = useState<Note | null>(null);
   const [selectedNoteForEditing, setSelectedNoteForEditing] = useState<Note | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -28,6 +29,7 @@ export default function Home() {
   const [isDeletingNote, setIsDeletingNote] = useState(false);
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [searchQuery, setSearchQuery] = useState('')
+  const [toast, setToast] = useState<Toast>({ open: false, message: '', severity: 'success' })
 
   const loadInitialNotes = async () => {
     try {
@@ -96,8 +98,9 @@ export default function Home() {
       if (response.ok) {
         const newNote = await response.json();
         setNotes([newNote, ...notes]);
+        showToast('Note Created successfully!', "success", setToast)
       } else {
-        alert('Error on add note.')
+        showToast('Failed to create note', 'error', setToast)
       }
     } catch (error) {
       console.error('Error creating note: ', error);
@@ -141,8 +144,9 @@ export default function Home() {
         const savedNote = await response.json();
         setNotes(notes.map(n => n.id === savedNote.id ? savedNote : n));
         setIsEditModalOpen(false);
+        showToast('Note updated!', 'success', setToast)
       } else {
-        alert('Error updating note');
+        showToast('Failed to update note', 'error', setToast)
       }
     } catch (error) {
       console.error('Error updating note:', error);
@@ -161,8 +165,9 @@ export default function Home() {
         setNotes(notes.filter(n => n.id !== noteId));
         setIsDeleteModalOpen(false);
         setSelectedNoteForDeletion(null);
+        showToast('Note deleted!', 'success', setToast)
       } else {
-        alert('Error deleting note');
+        showToast('Failed to delete note', 'error', setToast)
       }
     } catch (error) {
       console.error('Error deleting note:', error);
@@ -211,10 +216,11 @@ export default function Home() {
         });
 
         setNotes(prevNotes => prevNotes.map(n => n.id === noteId ? updatedNote : n));
+        showToast('AI summary generated!', 'success', setToast)
       }
     } catch (error) {
       console.error('Error generating AI tags:', error);
-      alert('Failed to generate AI tags');
+      showToast('Failed to generate AI content', 'error', setToast)
     } finally {
       setIsAiGeneratingNoteIds(prev => {
         const updated = new Set(prev);
@@ -240,12 +246,13 @@ export default function Home() {
 
       if (response.ok) {
         setNotes(prevNotes => prevNotes.map(n => n.id === noteId ? updatedNote : n));
+        showToast('Summary removed!', 'success', setToast)
       } else {
-        alert('Error deleting summary');
+        showToast('Failed to delete note summary', 'error', setToast)
       }
     } catch (error) {
       console.error('Error deleting summary:', error);
-      alert('Error deleting summary');
+      showToast('Failed to delete note summary', 'error', setToast)
     } finally {
       setIsDeletingSummaryNoteIds(prev => {
         const updated = new Set(prev);
@@ -396,6 +403,10 @@ export default function Home() {
         }}
         onConfirmDelete={handleConfirmNoteDeletion}
         deleting={isDeletingNote}
+      />
+      <ToastNotification
+        toast={toast}
+        onClose={() => setToast({ ...toast, open: false })}
       />
       <ScrollToTop />
     </Box>

@@ -1,7 +1,5 @@
 import { supabase } from '../supabaseClient';
 
-
-// GET /api/notes
 export async function GET() {
   const { data, error } = await supabase
     .from('notes')
@@ -14,9 +12,7 @@ export async function GET() {
   return Response.json(data);
 }
 
-// POST /api/notes
 export async function POST(request: Request) {
-  // const { title, body, tags, summary } = await request.json();
   const json = await request.json()
   const title = json.title
   const body = json.body

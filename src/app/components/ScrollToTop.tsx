@@ -32,8 +32,8 @@ const ScrollToTop = () => {
                 onClick={scrollToTop}
                 sx={{
                     position: 'fixed',
-                    bottom: 40,
-                    right: 40,
+                    bottom: 30,
+                    right: 25,
                     bgcolor: '#0f172a',
                     color: 'white',
                     width: 58,

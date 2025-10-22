@@ -25,7 +25,6 @@ const NoteCardSkeleton = ({ index = 0 }: { index?: number }) => {
             <CardContent sx={{ px: 4, py: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box sx={{ flex: 1, pr: 3 }}>
-                        {/* Title Skeleton */}
                         <Skeleton
                             variant="rectangular"
                             width="70%"
@@ -36,7 +35,6 @@ const NoteCardSkeleton = ({ index = 0 }: { index?: number }) => {
                             }}
                         />
 
-                        {/* Tags Skeleton */}
                         <Box sx={{ mt: 0.5, mb: 2 }}>
                             <Stack direction="row" spacing={1}>
                                 <Skeleton
@@ -60,7 +58,6 @@ const NoteCardSkeleton = ({ index = 0 }: { index?: number }) => {
                             </Stack>
                         </Box>
 
-                        {/* Body Content Skeleton */}
                         <Box>
                             <Skeleton
                                 variant="rectangular"
@@ -83,7 +80,6 @@ const NoteCardSkeleton = ({ index = 0 }: { index?: number }) => {
                         </Box>
                     </Box>
 
-                    {/* Action Buttons Skeleton */}
                     <Stack spacing={1} direction='row'>
                         <Skeleton
                             variant="circular"
@@ -103,7 +99,6 @@ const NoteCardSkeleton = ({ index = 0 }: { index?: number }) => {
                     </Stack>
                 </Box>
 
-                {/* Date Skeleton */}
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'row-reverse',

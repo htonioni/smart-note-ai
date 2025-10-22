@@ -112,7 +112,6 @@ const EditNoteModal = ({
             <DialogContent sx={{
                 px: 3
             }}>
-                {/* Custom Title */}
                 <Typography
                     variant="h6"
                     sx={{
@@ -185,7 +184,6 @@ const EditNoteModal = ({
                         }}
                     />
 
-                    {/* Clean Tags Section */}
                     <Box>
                         <Typography variant="body2" sx={{
                             color: '#64748b',
@@ -195,7 +193,6 @@ const EditNoteModal = ({
                             Tags
                         </Typography>
 
-                        {/* Display existing tags */}
                         {editTags.length > 0 && (
                             <Box sx={{ mb: 2 }}>
                                 <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>

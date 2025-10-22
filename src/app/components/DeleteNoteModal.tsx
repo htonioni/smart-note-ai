@@ -44,7 +44,6 @@ const DeleteNoteModal = ({
             }}
         >
             <DialogContent sx={{ py: 4, px: 6, textAlign: 'center' }}>
-                {/* Custom Title */}
                 <Typography variant="h6" sx={{
                     fontSize: '1.1rem',
                     fontWeight: 600,

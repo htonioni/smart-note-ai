@@ -1,14 +1,6 @@
 import { supabase } from '../../supabaseClient';
 
-
-async function getNoteById(id: number) {
-    const { data, error } = await supabase.from('notes').select('*').eq('id', id).single();
-    return { data, error };
-}
-
-// entender melhor sobre noteId, note, { id }
-// GET /api/notes/[id]
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const noteId = Number(id)
     const { data, error } = await supabase.from('notes').select('*').eq('id', noteId).single();
@@ -19,9 +11,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return Response.json(data, { status: 201 });
 }
 
-// PUT /api/notes/[id]
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    // this is the data from the sent request
     const { title, body, tags, summary } = await request.json();
     const { id } = await params;
 
@@ -44,8 +34,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     return Response.json(data);
 }
 
-// DELETE /api/notes/[id]
-export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const noteId = Number(id);
     const { error } = await supabase
