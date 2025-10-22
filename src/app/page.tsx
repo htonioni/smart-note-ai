@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Note } from '../types/note'
-import { Box, Stack, Typography, Container, Button } from '@mui/material';
+import { Box, Stack, Typography, Container } from '@mui/material';
 import NoteEmpty from './components/NoteEmpty';
 import CreateNoteForm from './components/CreateNoteForm'
 import NoteCard from './components/NoteCard';

@@ -1,4 +1,4 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CircularProgress } from '@mui/material';
+import { Dialog, DialogContent, DialogActions, Button, Typography, CircularProgress } from '@mui/material';
 import { Note } from '../../types/note';
 
 interface DeleteNoteModalProps {

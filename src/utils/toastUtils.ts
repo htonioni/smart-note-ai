@@ -7,7 +7,7 @@ export interface Toast {
 export const showToast = (
   message: string,
   severity: "success" | "error" | "info" | "warning",
-  setToast: Function
+  setToast: (toast: Toast) => void
 ) => {
   setToast({
     open: true,

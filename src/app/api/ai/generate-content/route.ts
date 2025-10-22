@@ -58,7 +58,7 @@ async function generateTagsAndSummary(title: string, body: string) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { id, title, body: noteBody } = body;
+        const { title, body: noteBody } = body;
         if (!title || !noteBody) {
             return Response.json(
                 { success: false, error: "title and body are required" },
