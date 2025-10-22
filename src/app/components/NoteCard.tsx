@@ -8,18 +8,18 @@ import { getRelativeTime } from "@/utils/dateUtils";
 interface NoteCardProps {
     note: Note;
     index: number;
-    onGenerateAITags: (noteId: number) => void;
+    onGenerateAI: (noteId: number) => void;
     onEditNote: (note: Note) => void;
     onDeleteNote: (note: Note) => void;
     onDeleteNoteSummary: (noteId: number) => void;
-    aiLoading: number | null;
-    summaryDeleteLoading: number | null;
+    aiLoading: Set<number>;
+    summaryDeleteLoading: Set<number>;
 }
 
 const NoteCard = ({
     note,
     index,
-    onGenerateAITags,
+    onGenerateAI,
     onEditNote,
     onDeleteNote,
     onDeleteNoteSummary,
@@ -128,9 +128,9 @@ const NoteCard = ({
                                         <Box>
                                             <IconButton
                                                 onClick={() => onDeleteNoteSummary(note.id)}
-                                                disabled={summaryDeleteLoading === note.id}
+                                                disabled={summaryDeleteLoading.has(note.id)}
                                             >
-                                                {summaryDeleteLoading === note.id ? (
+                                                {summaryDeleteLoading.has(note.id) ? (
                                                     <CircularProgress size={16} sx={{ color: '#f87171' }} />
                                                 ) : (
                                                     <ClearIcon fontSize='small' />
@@ -165,10 +165,10 @@ const NoteCard = ({
                         </Typography>
                     </Box>
                     <IconButton
-                        onClick={() => onGenerateAITags(note.id)}
-                        disabled={aiLoading === note.id}
+                        onClick={() => onGenerateAI(note.id)}
+                        disabled={aiLoading.has(note.id)}
                     >
-                        {aiLoading === note.id ? (
+                        {aiLoading.has(note.id) ? (
                             <CircularProgress size={22} color="inherit" />
                         ) : (
                             <AutoAwesomeIcon />

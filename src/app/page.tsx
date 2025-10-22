@@ -10,18 +10,16 @@ import DeleteNoteModal from './components/DeleteNoteModal';
 import SearchBar from './components/SearchBar';
 import NoteCardSkeleton from './components/NoteCardSkeleton';
 import ScrollToTop from './components/ScrollToTop';
-import PasswordGate from './components/PasswordGate';
 import Image from 'next/image'
 import Underline from '../assets/underline.svg';
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [filteredNotes, setFilteredNotes] = useState<Note[]>([])
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
   const [isCreatingNote, setIsCreatingNote] = useState(false);
-  const [isAiGeneratingForNoteId, setIsAiGeneratingForNoteId] = useState<number | null>(null);
-  const [isDeletingSummaryForNoteId, setIsDeletingSummaryForNoteId] = useState<number | null>(null);
+  const [isAiGeneratingNoteIds, setIsAiGeneratingNoteIds] = useState<Set<number>>(new Set());
+  const [isDeletingSummaryNoteIds, setIsDeletingSummaryNoteIds] = useState<Set<number>>(new Set());
 
   const [selectedNoteForDeletion, setSelectedNoteForDeletion] = useState<Note | null>(null);
   const [selectedNoteForEditing, setSelectedNoteForEditing] = useState<Note | null>(null);
@@ -30,12 +28,6 @@ export default function Home() {
   const [isDeletingNote, setIsDeletingNote] = useState(false);
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [searchQuery, setSearchQuery] = useState('')
-
-
-  useEffect(() => {
-    const authenticated = sessionStorage.getItem('gateAuthenticated') === 'true';
-    setIsAuthenticated(authenticated);
-  }, []);
 
   const loadInitialNotes = async () => {
     try {
@@ -136,8 +128,6 @@ export default function Home() {
     return { tags: null, summary: null };
   };
 
-
-
   const handleSaveNoteChanges = async (updatedNote: Note) => {
     setIsSavingNote(true);
     try {
@@ -192,8 +182,8 @@ export default function Home() {
     setIsEditModalOpen(true);
   };
 
-  const handleGenerateAITagsForNote = async (noteId: number) => {
-    setIsAiGeneratingForNoteId(noteId);
+  const handleGenerateAIForNote = async (noteId: number) => {
+    setIsAiGeneratingNoteIds(prev => new Set([...prev, noteId]));
     try {
       const note = notes.find(n => n.id === noteId);
       if (!note) return;
@@ -220,18 +210,22 @@ export default function Home() {
           body: JSON.stringify(updatedNote)
         });
 
-        setNotes(notes.map(n => n.id === noteId ? updatedNote : n));
+        setNotes(prevNotes => prevNotes.map(n => n.id === noteId ? updatedNote : n));
       }
     } catch (error) {
       console.error('Error generating AI tags:', error);
       alert('Failed to generate AI tags');
     } finally {
-      setIsAiGeneratingForNoteId(null);
+      setIsAiGeneratingNoteIds(prev => {
+        const updated = new Set(prev);
+        updated.delete(noteId);
+        return updated;
+      });
     }
   };
 
   const handleDeleteNoteSummary = async (noteId: number) => {
-    setIsDeletingSummaryForNoteId(noteId);
+    setIsDeletingSummaryNoteIds(prev => new Set([...prev, noteId]));
     try {
       const note = notes.find(n => n.id === noteId);
       if (!note) return;
@@ -245,7 +239,7 @@ export default function Home() {
       });
 
       if (response.ok) {
-        setNotes(notes.map(n => n.id === noteId ? updatedNote : n));
+        setNotes(prevNotes => prevNotes.map(n => n.id === noteId ? updatedNote : n));
       } else {
         alert('Error deleting summary');
       }
@@ -253,22 +247,24 @@ export default function Home() {
       console.error('Error deleting summary:', error);
       alert('Error deleting summary');
     } finally {
-      setIsDeletingSummaryForNoteId(null);
+      setIsDeletingSummaryNoteIds(prev => {
+        const updated = new Set(prev);
+        updated.delete(noteId);
+        return updated;
+      });
     }
   };
 
   return (
-    <>
-      {!isAuthenticated && <PasswordGate onSuccess={() => setIsAuthenticated(true)} />}
-      <Box
-        sx={{
-          minHeight: '100vh',
-          bgcolor: '#f8f9fa',
-          py: 4,
-          px: 10,
-          color: '#0f172a'
-        }}
-      >
+    <Box
+      sx={{
+        minHeight: '100vh',
+        bgcolor: '#f8f9fa',
+        py: 4,
+        px: 10,
+        color: '#0f172a'
+      }}
+    >
       <Container maxWidth="xl">
         <Box sx={{ textAlign: 'center', mb: 5 }}>
           <Typography
@@ -369,12 +365,12 @@ export default function Home() {
                         key={`${note.id}-${note.updatedAt}`}
                         note={note}
                         index={index}
-                        onGenerateAITags={handleGenerateAITagsForNote}
+                        onGenerateAI={handleGenerateAIForNote}
                         onEditNote={handleRequestNoteEdit}
                         onDeleteNote={handleRequestNoteDeletion}
                         onDeleteNoteSummary={handleDeleteNoteSummary}
-                        aiLoading={isAiGeneratingForNoteId}
-                        summaryDeleteLoading={isDeletingSummaryForNoteId}
+                        aiLoading={isAiGeneratingNoteIds}
+                        summaryDeleteLoading={isDeletingSummaryNoteIds}
                       />
                     ))
                   )}
@@ -402,7 +398,6 @@ export default function Home() {
         deleting={isDeletingNote}
       />
       <ScrollToTop />
-      </Box>
-    </>
+    </Box>
   );
 }
