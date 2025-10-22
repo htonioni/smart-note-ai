@@ -9,7 +9,6 @@ interface SearchBarProps {
     resultsCount: number;
 }
 
-
 const SearchBar = ({
     searchQuery,
     onSearchChange,
@@ -24,22 +23,24 @@ const SearchBar = ({
             <TextField
                 fullWidth
                 variant='outlined'
-                placeholder='Search notes by title, content, tags or summary ....'
+                placeholder='Search by title, content, tags, summary or date (e.g., "today", "last week", "december", "02/17/2000", "May 04, 2025")...'
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                InputProps={{
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <SearchIcon sx={{ color: '#64748b' }} />
-                        </InputAdornment>
-                    ),
-                    endAdornment: searchQuery && (
-                        <InputAdornment position="end">
-                            <IconButton onClick={handleClear} size="small">
-                                <ClearIcon />
-                            </IconButton>
-                        </InputAdornment>
-                    ),
+                slotProps={{
+                    input: {
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon sx={{ color: '#64748b' }} />
+                            </InputAdornment>
+                        ),
+                        endAdornment: searchQuery && (
+                            <InputAdornment position="end">
+                                <IconButton onClick={handleClear} size="small">
+                                    <ClearIcon />
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }
                 }}
                 sx={{
                     '& .MuiOutlinedInput-root': {

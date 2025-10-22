@@ -12,6 +12,7 @@ import NoteCardSkeleton from './components/NoteCardSkeleton';
 import ScrollToTop from './components/ScrollToTop';
 import { ToastNotification } from './components/ToastNotification';
 import { Toast, showToast } from '../utils/toastUtils'
+import { parseDateSearch, isNoteInDateRange } from '../utils/dateSearchUtils'
 import Image from 'next/image'
 import Underline from '../assets/underline.svg';
 
@@ -55,7 +56,14 @@ export default function Home() {
     }
 
     const query = searchQuery.toLowerCase();
+    const dateSearchResult = parseDateSearch(query);
+    
     const filtered = notes.filter(note => {
+      if (dateSearchResult.isDateSearch && dateSearchResult.dateRange) {
+        return isNoteInDateRange(note.updatedAt, dateSearchResult.dateRange);
+      }
+      
+      // otherwise regular search
       const titleMatch = note.title.toLowerCase().includes(query);
       const bodyMatch = note.body.toLowerCase().includes(query);
       const tagMatch = note.tags?.some(tag => tag.toLowerCase().includes(query)) || false;
