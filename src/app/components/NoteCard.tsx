@@ -1,5 +1,6 @@
 import { Note } from "@/types/note";
 import { Box, Card, CardContent, Chip, CircularProgress, IconButton, Stack, Typography } from "@mui/material";
+import { SummarySkeleton } from './NoteCardSkeleton';
 import EditIcon from '@mui/icons-material/Edit';
 import ClearIcon from '@mui/icons-material/Clear';
 import { getRelativeTime } from "@/utils/dateUtils";
@@ -27,6 +28,9 @@ const NoteCard = ({
     aiLoading,
     summaryDeleteLoading
 }: NoteCardProps) => {
+
+    const shouldShowAIButton = !note.summary || (note.tags && note.tags.length < 4);
+
     return (
         <Card
             elevation={1}
@@ -68,18 +72,16 @@ const NoteCard = ({
                                 {note.title}
                             </Typography>
                             <Box>
-                                <IconButton
-                                    onClick={() => onGenerateAI(note.id)}
-                                    disabled={aiLoading.has(note.id)}
-                                    sx={{
-                                        '&:hover img': {
-                                            filter: 'grayscale(100%) brightness(0) opacity(0.8)'
-                                        }
-                                    }}
-                                >
-                                    {aiLoading.has(note.id) ? (
-                                        <CircularProgress size={22} color="inherit" />
-                                    ) : (
+                                {shouldShowAIButton && (
+                                    <IconButton
+                                        onClick={() => onGenerateAI(note.id)}
+                                        disabled={aiLoading.has(note.id)}
+                                        sx={{
+                                            '&:hover img': {
+                                                filter: 'grayscale(100%) brightness(0) opacity(0.8)'
+                                            }
+                                        }}
+                                    >
                                         <Image
                                             src={generativeIcon}
                                             alt="Generate AI"
@@ -90,8 +92,8 @@ const NoteCard = ({
                                                 transition: 'filter 0.2s ease',
                                             }}
                                         />
-                                    )}
-                                </IconButton>
+                                    </IconButton>
+                                )}
                                 <IconButton
                                     onClick={() => onEditNote(note)}
                                 >
@@ -134,7 +136,9 @@ const NoteCard = ({
                                 </Stack>
                             </Box>
                         )}
-                        {note.summary && (
+                        {aiLoading.has(note.id) ? (
+                            <SummarySkeleton />
+                        ) : note.summary ? (
                             <Box sx={{ pr: '2rem' }}>
                                 <Box sx={{
                                     mt: 2,
@@ -201,7 +205,7 @@ const NoteCard = ({
                                     </Box>
                                 </Box>
                             </Box>
-                        )}
+                        ) : null}
                         <Typography
                             variant="body1"
                             color="text.secondary"

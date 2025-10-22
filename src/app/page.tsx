@@ -8,7 +8,7 @@ import NoteCard from './components/NoteCard';
 import EditNoteModal from './components/EditNoteModal';
 import DeleteNoteModal from './components/DeleteNoteModal';
 import SearchBar from './components/SearchBar';
-import NoteCardSkeleton from './components/NoteCardSkeleton';
+import { NoteCardSkeleton } from './components/NoteCardSkeleton'
 import ScrollToTop from './components/ScrollToTop';
 import { ToastNotification } from './components/ToastNotification';
 import { Toast, showToast } from '../utils/toastUtils'
