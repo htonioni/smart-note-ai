@@ -54,19 +54,66 @@ const NoteCard = ({
         >
             <CardContent sx={{ px: 4, py: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Box sx={{ flex: 1, pr: 3 }}>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontWeight: 600,
-                                color: '#333',
-                                mb: 1,
-                                wordBreak: 'break-word',
-                                fontSize: '1.3rem'
-                            }}
-                        >
-                            {note.title}
-                        </Typography>
+                    <Box sx={{ flex: 1 }}>
+                        <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography
+                                variant="h6"
+                                sx={{
+                                    fontWeight: 600,
+                                    color: '#333',
+                                    wordBreak: 'break-word',
+                                    fontSize: '1.3rem'
+                                }}
+                            >
+                                {note.title}
+                            </Typography>
+                            <Box>
+                                <IconButton
+                                    onClick={() => onGenerateAI(note.id)}
+                                    disabled={aiLoading.has(note.id)}
+                                    sx={{
+                                        '&:hover img': {
+                                            filter: 'grayscale(100%) brightness(0) opacity(0.8)'
+                                        }
+                                    }}
+                                >
+                                    {aiLoading.has(note.id) ? (
+                                        <CircularProgress size={22} color="inherit" />
+                                    ) : (
+                                        <Image
+                                            src={generativeIcon}
+                                            alt="Generate AI"
+                                            width={24}
+                                            height={24}
+                                            style={{
+                                                filter: 'grayscale(100%) brightness(0) opacity(0.54)',
+                                                transition: 'filter 0.2s ease',
+                                            }}
+                                        />
+                                    )}
+                                </IconButton>
+                                <IconButton
+                                    onClick={() => onEditNote(note)}
+                                >
+                                    <EditIcon
+                                        fontSize='small'
+                                    />
+                                </IconButton>
+                                <IconButton
+                                    onClick={() => onDeleteNote(note)}
+                                    sx={{
+                                        '&:hover': {
+                                            bgcolor: '#fee2e2',
+                                            color: '#dc2626'
+                                        }
+                                    }}
+                                >
+                                    <ClearIcon
+                                        fontSize='small'
+                                    />
+                                </IconButton>
+                            </Box>
+                        </Box>
                         {note.tags && note.tags.length > 0 && (
                             <Box sx={{ mt: 0.5, mb: 2 }}>
                                 <Stack direction="row" spacing={1} flexWrap="wrap">
@@ -88,68 +135,70 @@ const NoteCard = ({
                             </Box>
                         )}
                         {note.summary && (
-                            <Box sx={{
-                                mt: 2,
-                                mb: 2,
-                                px: 2.5,
-                                py: 1.5,
-                                bgcolor: 'linear-gradient(135deg, #ff7e7e 0%, #e53e3e 100%)',
-                                borderRadius: 2,
-                                position: 'relative',
-                                '&::before': {
-                                    content: '""',
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
+                            <Box sx={{ pr: '2rem' }}>
+                                <Box sx={{
+                                    mt: 2,
+                                    mb: 2,
+                                    px: 2.5,
+                                    py: 1.5,
+                                    bgcolor: 'linear-gradient(135deg, #ff7e7e 0%, #e53e3e 100%)',
                                     borderRadius: 2,
-                                    background: 'linear-gradient(135deg, rgba(255, 126, 126, 0.1) 0%, rgba(229, 62, 62, 0.1) 100%)',
-                                    backdropFilter: 'blur(10px)'
-                                }
-                            }}>
-                                <Box sx={{ position: 'relative', zIndex: 1 }}>
-                                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <Box sx={{ height: 20, mr: 1 }}>
-                                                <Typography sx={{ fontSize: '12px' }}>✨</Typography>
+                                    position: 'relative',
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        borderRadius: 2,
+                                        background: 'linear-gradient(135deg, rgba(255, 126, 126, 0.1) 0%, rgba(229, 62, 62, 0.1) 100%)',
+                                        backdropFilter: 'blur(10px)'
+                                    }
+                                }}>
+                                    <Box sx={{ position: 'relative', zIndex: 1 }}>
+                                        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                <Box sx={{ height: 20, mr: 1 }}>
+                                                    <Typography sx={{ fontSize: '12px' }}>✨</Typography>
+                                                </Box>
+                                                <Typography
+                                                    variant="subtitle2"
+                                                    sx={{
+                                                        fontWeight: 600,
+                                                        color: '#f87171',
+                                                        fontSize: '0.85rem',
+                                                        letterSpacing: '0.5px'
+                                                    }}
+                                                >
+                                                    AI Summary
+                                                </Typography>
                                             </Box>
-                                            <Typography
-                                                variant="subtitle2"
-                                                sx={{
-                                                    fontWeight: 600,
-                                                    color: '#f87171',
-                                                    fontSize: '0.85rem',
-                                                    letterSpacing: '0.5px'
-                                                }}
-                                            >
-                                                AI Summary
-                                            </Typography>
+                                            <Box>
+                                                <IconButton
+                                                    onClick={() => onDeleteNoteSummary(note.id)}
+                                                    disabled={summaryDeleteLoading.has(note.id)}
+                                                >
+                                                    {summaryDeleteLoading.has(note.id) ? (
+                                                        <CircularProgress size={16} sx={{ color: '#f87171' }} />
+                                                    ) : (
+                                                        <ClearIcon fontSize='small' />
+                                                    )}
+                                                </IconButton>
+                                            </Box>
                                         </Box>
-                                        <Box>
-                                            <IconButton
-                                                onClick={() => onDeleteNoteSummary(note.id)}
-                                                disabled={summaryDeleteLoading.has(note.id)}
-                                            >
-                                                {summaryDeleteLoading.has(note.id) ? (
-                                                    <CircularProgress size={16} sx={{ color: '#f87171' }} />
-                                                ) : (
-                                                    <ClearIcon fontSize='small' />
-                                                )}
-                                            </IconButton>
-                                        </Box>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                color: '#1e293b',
+                                                lineHeight: 1.6,
+                                                fontSize: '0.9rem',
+                                                fontWeight: 500,
+                                            }}
+                                        >
+                                            {note.summary}
+                                        </Typography>
                                     </Box>
-                                    <Typography
-                                        variant="body2"
-                                        sx={{
-                                            color: '#1e293b',
-                                            lineHeight: 1.6,
-                                            fontSize: '0.9rem',
-                                            fontWeight: 500,
-                                        }}
-                                    >
-                                        {note.summary}
-                                    </Typography>
                                 </Box>
                             </Box>
                         )}
@@ -165,50 +214,7 @@ const NoteCard = ({
                             {note.body}
                         </Typography>
                     </Box>
-                    <IconButton
-                        onClick={() => onGenerateAI(note.id)}
-                        disabled={aiLoading.has(note.id)}
-                        sx={{
-                            '&:hover img': {
-                                filter: 'grayscale(100%) brightness(0) opacity(0.8)'
-                            }
-                        }}
-                    >
-                        {aiLoading.has(note.id) ? (
-                            <CircularProgress size={22} color="inherit" />
-                        ) : (
-                            <Image 
-                                src={generativeIcon}
-                                alt="Generate AI"
-                                width={24}
-                                height={24}
-                                style={{
-                                    filter: 'grayscale(100%) brightness(0) opacity(0.54)',
-                                    transition: 'filter 0.2s ease',
-                                }}
-                            />
-                        )}
-                    </IconButton>
-                    <IconButton
-                        onClick={() => onEditNote(note)}
-                    >
-                        <EditIcon
-                            fontSize='small'
-                        />
-                    </IconButton>
-                    <IconButton
-                        onClick={() => onDeleteNote(note)}
-                        sx={{
-                            '&:hover': {
-                                bgcolor: '#fee2e2',
-                                color: '#dc2626'
-                            }
-                        }}
-                    >
-                        <ClearIcon
-                            fontSize='small'
-                        />
-                    </IconButton>
+
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                     <Typography

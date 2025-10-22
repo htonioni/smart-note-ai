@@ -1,27 +1,32 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Box, Button, Paper, Stack, TextField, Typography, CircularProgress } from "@mui/material"
 
 interface CreateNoteFormProps {
     onSubmit: (title: string, body: string, aiEnabled: boolean) => void;
     isLoading: boolean;
+    onSubmitSuccess?: () => void;
 }
 
-const CreateNoteForm = ({ onSubmit, isLoading = false }: CreateNoteFormProps) => {
+const CreateNoteForm = ({ onSubmit, isLoading = false, onSubmitSuccess }: CreateNoteFormProps) => {
 
     const [title, setTitle] = useState('');
     const [body, setBody] = useState('');
     const [aiEnabled, setAiEnabled] = useState(false);
 
+    useEffect(() => {
+        if (!isLoading){
+            setTitle('');
+            setBody('');
+            setAiEnabled(false);
+            onSubmitSuccess?.();
+        }
+    }, [isLoading, onSubmitSuccess])
+
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (!title.trim() || !body.trim()) return;
-
         onSubmit(title.trim(), body.trim(), aiEnabled);
-
-        setTitle('');
-        setBody('');
-        setAiEnabled(false);
     }
 
     return (
@@ -60,6 +65,7 @@ const CreateNoteForm = ({ onSubmit, isLoading = false }: CreateNoteFormProps) =>
                             variant="outlined"
                             required
                             fullWidth
+                            disabled={isLoading}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
@@ -92,6 +98,7 @@ const CreateNoteForm = ({ onSubmit, isLoading = false }: CreateNoteFormProps) =>
                             rows={4}
                             required
                             fullWidth
+                            disabled={isLoading}
                             sx={{
                                 '& .MuiOutlinedInput-root': {
                                     borderRadius: 2,
@@ -117,12 +124,13 @@ const CreateNoteForm = ({ onSubmit, isLoading = false }: CreateNoteFormProps) =>
                         />
                         <Box sx={{ mb: 2 }}>
                             <Box
-                                onClick={() => setAiEnabled(!aiEnabled)}
+                                onClick={() => !isLoading && setAiEnabled(!aiEnabled)}
                                 sx={{
                                     display: 'flex',
                                     alignItems: 'center',
-                                    cursor: 'pointer',
-                                    gap: 2
+                                    cursor: isLoading ? 'not-allowed' : 'pointer',
+                                    gap: 2,
+                                    opacity: isLoading ? 0.5 : 1
                                 }}
                             >
                                 <Box
