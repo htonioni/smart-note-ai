@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const correctAnswer = process.env.GATE_ANSWER;
 
     if (!correctAnswer) {
-      console.error('GATE_ANSWER environment variable is not set');
+      console.error('GATE_ANSWER is undefined. Available env vars:', Object.keys(process.env).filter(key => key.includes('GATE')));
       return Response.json(
         { success: false, error: 'Server configuration error' },
         { status: 500 }
