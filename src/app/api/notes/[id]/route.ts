@@ -1,6 +1,6 @@
 import { supabase } from '../../supabaseClient';
 
-export async function GET({ params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const noteId = Number(id)
     const { data, error } = await supabase.from('notes').select('*').eq('id', noteId).single();
@@ -17,12 +17,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const { data, error } = await supabase
         .from('notes')
-        .update({ 
-            title, 
-            body, 
-            tags, 
+        .update({
+            title,
+            body,
+            tags,
             summary,
-            updatedAt: new Date().toISOString() 
+            updatedAt: new Date().toISOString()
         })
         .eq('id', id)
         .select()
@@ -34,7 +34,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     return Response.json(data);
 }
 
-export async function DELETE({ params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const noteId = Number(id);
     const { error } = await supabase
