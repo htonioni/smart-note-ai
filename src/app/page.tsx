@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { Note } from '@/types/note'
-import { AIContent } from '@/types/ai';
 import { Box, Stack, Typography, Container } from '@mui/material';
 import NoteEmpty from './components/NoteEmpty';
 import CreateNoteForm from './components/CreateNoteForm'

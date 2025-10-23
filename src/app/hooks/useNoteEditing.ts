@@ -32,6 +32,8 @@ export const useNoteEditing = (
         showToast('Note updated!', 'success', setToast)
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const serverMessage = errorData?.error || 'Failed to update note.';
+        console.warn('Update note failed:', serverMessage);
 
         if (response.status === 404) {
           showToast('Note not found. It may have been deleted.', 'error', setToast);
@@ -40,7 +42,7 @@ export const useNoteEditing = (
         } else if (response.status >= 500) {
           showToast('Service temporarily unavailable. Please try again in a moment.', 'error', setToast);
         } else {
-          showToast('Failed to update note. Please try again.', 'error', setToast);
+          showToast(serverMessage, 'error', setToast);
         }
       }
     } catch (error) {

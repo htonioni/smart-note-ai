@@ -46,10 +46,11 @@ async function generateTagsAndSummary(title: string, body: string) {
             success: true,
             data: aiResponse
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Gemini AI Error:', error);
-        if (error?.message) {
-            const errorMessage = error.message.toLowerCase();
+        const err = error instanceof Error ? error : null;
+        if (err?.message) {
+            const errorMessage = err.message.toLowerCase();
 
             // rate limit exceeded
             if (errorMessage.includes('rate limit') || errorMessage.includes('quota exceeded') || errorMessage.includes('429')) {
@@ -85,7 +86,7 @@ async function generateTagsAndSummary(title: string, body: string) {
         }
 
         // network or connection errors
-        if (error?.name === 'TypeError' && error?.message?.includes('fetch')) {
+        if (err?.name === 'TypeError' && err?.message?.includes('fetch')) {
             return {
                 success: false,
                 error: 'Network connection failed. Please check your internet connection and try again.'

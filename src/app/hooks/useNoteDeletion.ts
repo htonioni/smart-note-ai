@@ -28,6 +28,9 @@ export const useNoteDeletion = (
         showToast('Note deleted!', 'success', setToast)
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const serverMessage = errorData?.error || 'Failed to delete note.';
+        console.warn('Delete note failed:', serverMessage);
+
         if (response.status === 404) {
           showToast('Note not found. It may have already been deleted.', 'error', setToast);
           setNotes(notes.filter(n => n.id !== noteId));
@@ -38,7 +41,7 @@ export const useNoteDeletion = (
         } else if (response.status >= 500) {
           showToast('Service temporarily unavailable. Please try again in a moment.', 'error', setToast);
         } else {
-          showToast('Failed to delete note. Please try again.', 'error', setToast);
+          showToast(serverMessage, 'error', setToast);
         }
       }
     } catch (error) {

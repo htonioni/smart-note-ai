@@ -1,11 +1,12 @@
 import { Note } from "@/types/note";
 import { useEffect } from "react";
+import { Toast } from '@/utils/toastUtils';
 
 export const useNotesLoading = (
     setNotes: (notes: Note[]) => void,
     setFilteredNotes: (notes: Note[]) => void,
     setIsLoadingNotes: (loading: boolean) => void,
-    setToast: (toast: any) => void
+    setToast: (toast: Toast) => void
 ) => {
     useEffect(() => {
         const loadInitialNotes = async () => {
