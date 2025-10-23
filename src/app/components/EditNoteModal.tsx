@@ -34,13 +34,17 @@ const EditNoteModal = ({
     const [editBody, setEditBody] = useState('');
     const [editTags, setEditTags] = useState<string[]>([]);
     const [editTagInput, setEditTagInput] = useState('');
+    const [touchedTitle, setTouchedTitle] = useState(false);
+    const [touchedBody, setTouchedBody] = useState(false);
 
     useEffect(() => {
         if (note && open) {
             setEditTitle(note.title);
             setEditBody(note.body);
-            setEditTags(note.tags || [])
+            setEditTags(note.tags || []);
             setEditTagInput('');
+            setTouchedTitle(false);
+            setTouchedBody(false);
         }
     }, [note, open])
 
@@ -67,6 +71,13 @@ const EditNoteModal = ({
     const handleSave = () => {
         if (!note) return;
 
+        // simple guard: don't allow empty title/body
+        if (editTitle.trim() === '' || editBody.trim() === '') {
+            setTouchedTitle(true);
+            setTouchedBody(true);
+            return;
+        }
+
         const updatedNote: Note = {
             ...note,
             title: editTitle.trim(),
@@ -84,6 +95,8 @@ const EditNoteModal = ({
             setEditBody('');
             setEditTags([]);
             setEditTagInput('');
+            setTouchedTitle(false);
+            setTouchedBody(false);
         }, 100);
     };
 
@@ -128,28 +141,13 @@ const EditNoteModal = ({
                         label='Title'
                         value={editTitle}
                         onChange={e => setEditTitle(e.target.value)}
+                        onBlur={() => setTouchedTitle(true)}
                         fullWidth
                         variant="outlined"
+                        error={touchedTitle && editTitle.trim() === ''}
+                        helperText={touchedTitle && editTitle.trim() === '' ? "This field can't be empty" : ''}
                         sx={{
-                            '& .MuiOutlinedInput-root': {
-                                borderRadius: 2,
-                                '& fieldset': {
-                                    borderColor: '#e2e8f0'
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: '#cbd5e0',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: '#075985',
-                                    borderWidth: 2
-                                }
-                            },
-                            '& .MuiInputLabel-root': {
-                                color: '#64748b',
-                                '&.Mui-focused': {
-                                    color: '#075985'
-                                }
-                            }
+                            '& .MuiOutlinedInput-root': { borderRadius: 2 }
                         }}
                     />
 
@@ -157,30 +155,15 @@ const EditNoteModal = ({
                         label='Content'
                         value={editBody}
                         onChange={e => setEditBody(e.target.value)}
+                        onBlur={() => setTouchedBody(true)}
                         fullWidth
                         multiline
                         rows={4}
                         variant="outlined"
+                        error={touchedBody && editBody.trim() === ''}
+                        helperText={touchedBody && editBody.trim() === '' ? "This field can't be empty" : ''}
                         sx={{
-                            '& .MuiOutlinedInput-root': {
-                                borderRadius: 2,
-                                '& fieldset': {
-                                    borderColor: '#e2e8f0'
-                                },
-                                '&:hover fieldset': {
-                                    borderColor: '#cbd5e0',
-                                },
-                                '&.Mui-focused fieldset': {
-                                    borderColor: '#075985',
-                                    borderWidth: 2
-                                }
-                            },
-                            '& .MuiInputLabel-root': {
-                                color: '#64748b',
-                                '&.Mui-focused': {
-                                    color: '#075985'
-                                }
-                            }
+                            '& .MuiOutlinedInput-root': { borderRadius: 2 }
                         }}
                     />
 
@@ -235,24 +218,7 @@ const EditNoteModal = ({
                             size="small"
                             helperText="Press Enter or comma to add tag"
                             sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: 2,
-                                    '& fieldset': {
-                                        borderColor: '#e2e8f0'
-                                    },
-                                    '&:hover fieldset': {
-                                        borderColor: '#cbd5e0',
-                                    },
-                                    '&.Mui-focused fieldset': {
-                                        borderColor: '#075985'
-                                    }
-                                },
-                                '& .MuiInputLabel-root': {
-                                    color: '#64748b',
-                                    '&.Mui-focused': {
-                                        color: '#075985'
-                                    }
-                                }
+                                '& .MuiOutlinedInput-root': { borderRadius: 2 }
                             }}
                         />
                     </Box>
@@ -284,7 +250,7 @@ const EditNoteModal = ({
                 </Button>
                 <Button
                     onClick={handleSave}
-                    disabled={saving}
+                    disabled={saving || editTitle.trim() === '' || editBody.trim() === ''}
                     endIcon={saving ? <CircularProgress size={16} color="inherit" /> : null}
                     sx={{
                         borderRadius: 2,

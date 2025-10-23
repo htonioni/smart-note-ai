@@ -6,10 +6,30 @@ import { useState } from "react";
 export const useNoteCreation = (
     notes: Note[],
     setNotes: (notes: Note[]) => void,
-    generateAIContentForNote: (title: string, body: string) => Promise<AIContent>,
     setToast: (toast: Toast) => void
 ) => {
     const [isCreatingNote, setIsCreatingNote] = useState(false);
+
+    const generateAIContentForNote = async (title: string, body: string): Promise<AIContent> => {
+        try {
+          const aiResponse = await fetch('/api/ai/generate-content', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: 0, title: title.trim(), body: body.trim() })
+          });
+    
+          const result = await aiResponse.json();
+          if (result.success) {
+            return {
+              tags: result.data.tags,
+              summary: result.data.summary
+            };
+          }
+        } catch (error) {
+          console.error('AI generation failed:', error);
+        }
+        return { tags: null, summary: null };
+      };
 
     const handleCreateNote = async (
         title: string,

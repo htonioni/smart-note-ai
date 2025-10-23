@@ -33,46 +33,23 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [toast, setToast] = useState<Toast>({ open: false, message: '', severity: 'success' })
 
-
-  const generateAIContentForNote = async (title: string, body: string): Promise<AIContent> => {
-    try {
-      const aiResponse = await fetch('/api/ai/generate-content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: 0, title: title.trim(), body: body.trim() })
-      });
-
-      const result = await aiResponse.json();
-      if (result.success) {
-        return {
-          tags: result.data.tags,
-          summary: result.data.summary
-        };
-      }
-    } catch (error) {
-      console.error('AI generation failed:', error);
-    }
-    return { tags: null, summary: null };
-  };
-
-  const handleRequestNoteEdit = (note: Note) => {
-    setSelectedNoteForEditing(note);
-    setIsEditModalOpen(true);
-  };
-
-  const { isCreatingNote, handleCreateNote } = useNoteCreation(
+  const {
+    isCreatingNote,
+    handleCreateNote
+  } = useNoteCreation(
     notes,
     setNotes,
-    generateAIContentForNote,
     setToast
   );
 
   const {
     isSavingNote,
-    handleSaveNoteChanges
+    handleSaveNoteChanges,
+    handleRequestNoteEdit
   } = useNoteEditing(
     notes,
     setNotes,
+    setSelectedNoteForEditing,
     setIsEditModalOpen,
     setToast
   );
@@ -103,7 +80,7 @@ export default function Home() {
   useNotesLoading(setNotes, setFilteredNotes, setIsLoadingNotes);
   useNoteSearch(notes, searchQuery, setFilteredNotes);
 
-return (
+  return (
     <Box
       sx={{
         minHeight: '100vh',

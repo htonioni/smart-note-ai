@@ -5,10 +5,16 @@ import { Toast, showToast } from '@/utils/toastUtils';
 export const useNoteEditing = (
   notes: Note[],
   setNotes: (notes: Note[]) => void,
+  setSelectedNoteForEditing: (note: Note | null) => void,
   setIsEditModalOpen: (open: boolean) => void,
   setToast: (toast: Toast) => void
 ) => {
   const [isSavingNote, setIsSavingNote] = useState(false);
+
+  const handleRequestNoteEdit = (note: Note) => {
+    setSelectedNoteForEditing(note);
+    setIsEditModalOpen(true);
+  };
 
   const handleSaveNoteChanges = async (updatedNote: Note) => {
     setIsSavingNote(true);
@@ -37,6 +43,7 @@ export const useNoteEditing = (
 
   return {
     isSavingNote,
-    handleSaveNoteChanges
+    handleSaveNoteChanges,
+    handleRequestNoteEdit
   };
 };
