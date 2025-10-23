@@ -12,12 +12,14 @@ export const useNotesLoading = (
         const loadInitialNotes = async () => {
             try {
                 const response = await fetch('/api/notes');
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    setNotes(result.data);
+                    setFilteredNotes(result.data);
+                } else {
+                    throw new Error(result.error || 'Failed to load notes');
                 }
-                const data = await response.json();
-                setNotes(data);
-                setFilteredNotes(data);
             } catch (error) {
                 console.error('Failed to load notes:', error);
                 const errorMessage = error instanceof Error && error.message.includes('fetch')

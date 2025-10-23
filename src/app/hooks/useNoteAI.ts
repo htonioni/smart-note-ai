@@ -32,20 +32,34 @@ export const useNoteAI = (
       if (result.success) {
         const updatedNote = { ...note, tags: result.data.tags, summary: result.data.summary };
 
-        await fetch(`/api/notes/${noteId}`, {
+        const updateResponse = await fetch(`/api/notes/${noteId}`, {
           method: 'PUT',
           headers: { 'Content-type': 'application/json' },
           body: JSON.stringify(updatedNote)
         });
-        const updatedNotes = notes.map(n => n.id === noteId ? updatedNote : n);
-        setNotes(updatedNotes);
-        showToast('AI summary generated!', 'success', setToast)
+
+        if (updateResponse.ok) {
+          const updateResult = await updateResponse.json();
+          if (updateResult.success) {
+            const updatedNotes = notes.map(n => n.id === noteId ? updatedNote : n);
+            setNotes(updatedNotes);
+            showToast('AI summary generated!', 'success', setToast)
+          } else {
+            showToast('AI content generated but failed to save. Please try again.', 'warning', setToast);
+          }
+        } else {
+          showToast('AI content generated but failed to save. Please try again.', 'warning', setToast);
+        }
       } else {
         showToast(result.error || 'Failed to generate AI content', 'error', setToast)
       }
     } catch (error) {
       console.error('Error generating AI tags:', error);
-      showToast('Failed to generate AI content', 'error', setToast)
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        showToast('AI generation failed due to connection issues. Please try again.', 'error', setToast);
+      } else {
+        showToast('AI service temporarily unavailable. Please try again later.', 'error', setToast);
+      }
     } finally {
       setIsAiGeneratingNoteIds(prev => {
         const updated = new Set(prev);
@@ -70,14 +84,35 @@ export const useNoteAI = (
       });
 
       if (response.ok) {
-        const updatedNotes = notes.map(n => n.id === noteId ? updatedNote : n);
-        setNotes(updatedNotes);
+        const result = await response.json();
+        if (result.success) {
+          const updatedNotes = notes.map(n => n.id === noteId ? updatedNote : n);
+          setNotes(updatedNotes);
+          showToast('Summary removed successfully', 'success', setToast);
+        } else {
+          showToast(result.error || 'Failed to remove summary.', 'error', setToast);
+        }
       } else {
-        showToast('Failed to delete note summary', 'error', setToast)
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMessage = errorData.error || 'Failed to remove summary';
+
+        if (response.status === 500) {
+          showToast('Server error occurred while removing summary. Please try again.', 'error', setToast);
+        } else if (response.status === 404) {
+          showToast('Note not found. Please refresh and try again.', 'error', setToast);
+        } else if (response.status >= 500) {
+          showToast('Service temporarily unavailable. Please try again in a moment.', 'error', setToast);
+        } else {
+          showToast(errorMessage, 'error', setToast);
+        }
       }
     } catch (error) {
       console.error('Error deleting summary:', error);
-      showToast('Failed to delete note summary', 'error', setToast)
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        showToast('Connection failed while removing summary. Please check your internet and try again.', 'error', setToast);
+      } else {
+        showToast('Failed to remove summary. Please try again.', 'error', setToast);
+      }
     } finally {
       setIsDeletingSummaryNoteIds(prev => {
         const updated = new Set(prev);

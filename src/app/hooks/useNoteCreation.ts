@@ -64,9 +64,13 @@ export const useNoteCreation = (
             });
 
             if (response.ok) {
-                const newNote = await response.json();
-                setNotes([newNote, ...notes]);
-                showToast('Note Created successfully!', "success", setToast)
+                const result = await response.json();
+                if (result.success) {
+                    setNotes([result.data, ...notes]);
+                    showToast('Note Created successfully!', "success", setToast)
+                } else {
+                    showToast(result.error || 'Failed to create note', 'error', setToast);
+                }
             } else {
                 const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
                 const errorMessage = errorData.error || 'Failed to create note';

@@ -6,9 +6,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const { data, error } = await supabase.from('notes').select('*').eq('id', noteId).single();
 
     if (error) {
-        return Response.json({ error: error.message }, { status: 404 });
+        return Response.json({ success: false, error: error.message }, { status: 404 });
     }
-    return Response.json(data, { status: 201 });
+    return Response.json({ success: true, data }, { status: 200 });
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -29,9 +29,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         .single()
 
     if (error) {
-        return Response.json({ error: error.message }, { status: 404 })
+        return Response.json({ success: false, error: error.message }, { status: 404 })
     }
-    return Response.json(data);
+    return Response.json({ success: true, data });
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -43,7 +43,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
         .eq('id', noteId)
 
     if (error) {
-        return Response.json({ error: error.message }, { status: 404 })
+        return Response.json({ success: false, error: error.message }, { status: 404 })
     }
     return Response.json({ success: true })
 }

@@ -22,10 +22,15 @@ export const useNoteDeletion = (
       const response = await fetch(`/api/notes/${noteId}`, { method: 'DELETE' });
 
       if (response.ok) {
-        setNotes(notes.filter(n => n.id !== noteId));
-        setIsDeleteModalOpen(false);
-        setSelectedNoteForDeletion(null);
-        showToast('Note deleted!', 'success', setToast)
+        const result = await response.json();
+        if (result.success) {
+          setNotes(notes.filter(n => n.id !== noteId));
+          setIsDeleteModalOpen(false);
+          setSelectedNoteForDeletion(null);
+          showToast('Note deleted!', 'success', setToast)
+        } else {
+          showToast(result.error || 'Failed to delete note.', 'error', setToast);
+        }
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         const serverMessage = errorData?.error || 'Failed to delete note.';

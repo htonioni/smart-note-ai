@@ -26,10 +26,14 @@ export const useNoteEditing = (
       });
 
       if (response.ok) {
-        const savedNote = await response.json();
-        setNotes(notes.map(n => n.id === savedNote.id ? savedNote : n));
-        setIsEditModalOpen(false);
-        showToast('Note updated!', 'success', setToast)
+        const result = await response.json();
+        if (result.success) {
+          setNotes(notes.map(n => n.id === result.data.id ? result.data : n));
+          setIsEditModalOpen(false);
+          showToast('Note updated!', 'success', setToast)
+        } else {
+          showToast(result.error || 'Failed to update note.', 'error', setToast);
+        }
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         const serverMessage = errorData?.error || 'Failed to update note.';

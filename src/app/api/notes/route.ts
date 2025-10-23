@@ -7,9 +7,9 @@ export async function GET() {
     .order('updatedAt', { ascending: false });
 
   if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
-  return Response.json(data);
+  return Response.json({ success: true, data });
 }
 
 export async function POST(request: Request) {
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ success: false, error: error.message }, { status: 500 });
   }
-  return Response.json(data, { status: 201 });
+  return Response.json({ success: true, data }, { status: 201 });
 }
