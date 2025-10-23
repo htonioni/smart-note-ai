@@ -140,12 +140,20 @@ const EditNoteModal = ({
                     <TextField
                         label='Title'
                         value={editTitle}
-                        onChange={e => setEditTitle(e.target.value)}
+                        onChange={(e) => {
+                            if (e.target.value.length <= 60) {
+                                setEditTitle(e.target.value)
+                            }
+                        }}
+                        helperText={
+                            touchedTitle && editTitle.trim() === ''
+                                ? "This field can't be empty"
+                                : `${editTitle.length}/60 characters`
+                        }
                         onBlur={() => setTouchedTitle(true)}
                         fullWidth
                         variant="outlined"
                         error={touchedTitle && editTitle.trim() === ''}
-                        helperText={touchedTitle && editTitle.trim() === '' ? "This field can't be empty" : ''}
                         sx={{
                             '& .MuiOutlinedInput-root': { borderRadius: 2 }
                         }}
@@ -154,14 +162,22 @@ const EditNoteModal = ({
                     <TextField
                         label='Content'
                         value={editBody}
-                        onChange={e => setEditBody(e.target.value)}
+                        onChange={(e) => {
+                            if (e.target.value.length <= 1500) {
+                                setEditBody(e.target.value)
+                            }
+                        }}
                         onBlur={() => setTouchedBody(true)}
                         fullWidth
                         multiline
                         rows={4}
                         variant="outlined"
                         error={touchedBody && editBody.trim() === ''}
-                        helperText={touchedBody && editBody.trim() === '' ? "This field can't be empty" : ''}
+                        helperText={
+                            touchedBody && editBody.trim() === ''
+                                ? "This field can't be empty"
+                                : `${editBody.length}/1,500 characters`
+                        }
                         sx={{
                             '& .MuiOutlinedInput-root': { borderRadius: 2 }
                         }}

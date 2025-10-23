@@ -57,11 +57,16 @@ const CreateNoteForm = ({ onSubmit, isLoading = false, onSubmitSuccess }: Create
                 }}
             >
                 <form onSubmit={handleSubmit}>
-                    <Stack spacing={4}>
+                    <Stack spacing={3}>
                         <TextField
                             label="Title"
                             value={title}
-                            onChange={(e) => setTitle(e.target.value)}
+                            onChange={(e) => {
+                                if (e.target.value.length <= 60) {
+                                    setTitle(e.target.value)
+                                }
+                            }}
+                            helperText={`${title.length}/60 characters`}
                             variant="outlined"
                             required
                             fullWidth
@@ -92,7 +97,12 @@ const CreateNoteForm = ({ onSubmit, isLoading = false, onSubmitSuccess }: Create
                         <TextField
                             label="Content"
                             value={body}
-                            onChange={(e) => setBody(e.target.value)}
+                            onChange={(e) => {
+                                if (e.target.value.length <= 1500) {
+                                    setBody(e.target.value)
+                                }
+                            }}
+                            helperText={`${body.length}/1500 characters`}
                             variant="outlined"
                             multiline
                             rows={4}
