@@ -39,17 +39,6 @@ const NoteCard = ({
                 borderRadius: 2,
                 border: '1px solid #e2e8f0',
                 transition: 'all 0.2s ease',
-                animation: `slideIn 0.3s ease ${index * 0.1}s both`,
-                '@keyframes slideIn': {
-                    from: {
-                        opacity: 0,
-                        transform: 'translateY(20px)'
-                    },
-                    to: {
-                        opacity: 1,
-                        transform: 'translateY(0)'
-                    }
-                },
                 '&:hover': {
                     borderColor: '#cbd5e0',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
@@ -139,73 +128,71 @@ const NoteCard = ({
                         {aiLoading.has(note.id) ? (
                             <SummarySkeleton />
                         ) : note.summary ? (
-                            <Box sx={{ pr: '2rem' }}>
-                                <Box sx={{
-                                    mt: 2,
-                                    mb: 2,
-                                    px: 2.5,
-                                    py: 1.5,
-                                    bgcolor: 'linear-gradient(135deg, #ff7e7e 0%, #e53e3e 100%)',
+                            <Box sx={{
+                                mt: 2,
+                                mb: 2,
+                                px: 2.5,
+                                py: 1.5,
+                                bgcolor: 'linear-gradient(135deg, #ff7e7e 0%, #e53e3e 100%)',
+                                borderRadius: 2,
+                                position: 'relative',
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
                                     borderRadius: 2,
-                                    position: 'relative',
-                                    '&::before': {
-                                        content: '""',
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        borderRadius: 2,
-                                        background: 'linear-gradient(135deg, rgba(255, 126, 126, 0.1) 0%, rgba(229, 62, 62, 0.1) 100%)',
-                                        backdropFilter: 'blur(10px)'
-                                    }
-                                }}>
-                                    <Box sx={{ position: 'relative', zIndex: 1 }}>
-                                        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <Box sx={{ height: 20, mr: 1 }}>
-                                                    <Typography sx={{ fontSize: '12px' }}>✨</Typography>
-                                                </Box>
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    sx={{
-                                                        fontWeight: 600,
-                                                        color: '#f87171',
-                                                        fontSize: '0.85rem',
-                                                        letterSpacing: '0.5px'
-                                                    }}
-                                                >
-                                                    AI Summary
-                                                </Typography>
+                                    background: 'linear-gradient(135deg, rgba(255, 126, 126, 0.1) 0%, rgba(229, 62, 62, 0.1) 100%)',
+                                    backdropFilter: 'blur(10px)'
+                                }
+                            }}>
+                                <Box sx={{ position: 'relative', zIndex: 1 }}>
+                                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                            <Box sx={{ height: 20, mr: 1 }}>
+                                                <Typography sx={{ fontSize: '12px' }}>✨</Typography>
                                             </Box>
-                                            <Box>
-                                                <IconButton
-                                                    onClick={() => onDeleteNoteSummary(note.id)}
-                                                    disabled={summaryDeleteLoading.has(note.id)}
-                                                >
-                                                    {summaryDeleteLoading.has(note.id) ? (
-                                                        <CircularProgress size={16} sx={{ color: '#f87171' }} />
-                                                    ) : (
-                                                        <ClearIcon fontSize='small' />
-                                                    )}
-                                                </IconButton>
-                                            </Box>
+                                            <Typography
+                                                variant="subtitle2"
+                                                sx={{
+                                                    fontWeight: 600,
+                                                    color: '#f87171',
+                                                    fontSize: '0.85rem',
+                                                    letterSpacing: '0.5px'
+                                                }}
+                                            >
+                                                AI Summary
+                                            </Typography>
                                         </Box>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                color: '#1e293b',
-                                                lineHeight: 1.6,
-                                                fontSize: { xs: '0.8rem', sm: '1.3rem', lg: '0.9rem' },
-                                                fontWeight: 500,
-                                            }}
-                                        >
-                                            {note.summary}
-                                        </Typography>
+                                        <Box>
+                                            <IconButton
+                                                onClick={() => onDeleteNoteSummary(note.id)}
+                                                disabled={summaryDeleteLoading.has(note.id)}
+                                            >
+                                                {summaryDeleteLoading.has(note.id) ? (
+                                                    <CircularProgress size={16} sx={{ color: '#f87171' }} />
+                                                ) : (
+                                                    <ClearIcon fontSize='small' />
+                                                )}
+                                            </IconButton>
+                                        </Box>
                                     </Box>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            color: '#1e293b',
+                                            lineHeight: 1.6,
+                                            fontSize: { xs: '0.8rem', sm: '0.9rem', lg: '0.9rem' },
+                                            fontWeight: 500,
+                                        }}
+                                    >
+                                        {note.summary}
+                                    </Typography>
                                 </Box>
                             </Box>
-                        ) : null}
+                        ) : <Box sx={{ minHeight: '0px' }} />}
                         <Typography
                             variant="body1"
                             color="text.secondary"
