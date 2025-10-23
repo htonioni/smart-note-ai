@@ -14,7 +14,7 @@ const CreateNoteForm = ({ onSubmit, isLoading = false, onSubmitSuccess }: Create
     const [aiEnabled, setAiEnabled] = useState(false);
 
     useEffect(() => {
-        if (!isLoading){
+        if (!isLoading) {
             setTitle('');
             setBody('');
             setAiEnabled(false);
@@ -30,13 +30,20 @@ const CreateNoteForm = ({ onSubmit, isLoading = false, onSubmitSuccess }: Create
     }
 
     return (
-        <Box sx={{ flex: { xs: '1', lg: '0 0 500px' } }}>
+        <Box
+            sx={{
+                flex: { xs: '1', lg: '0 0 500px' },
+                maxWidth: { xs: '100%', lg: '500px' },
+                minWidth: { xs: '100%', lg: '400px' }
+            }}
+        >
             <Typography
                 variant="h5"
                 sx={{
                     mb: 2,
                     fontWeight: 600,
-                    color: '#333'
+                    color: '#333',
+                    fontSize: { xs: '1.4rem', md: '1.5rem', lg: '1.6rem' },
                 }}
             >
                 Create New Note
@@ -44,7 +51,7 @@ const CreateNoteForm = ({ onSubmit, isLoading = false, onSubmitSuccess }: Create
             <Paper
                 elevation={1}
                 sx={{
-                    p: 4,
+                    p: { xs: 3, sm: 5, lg: 4 },
                     borderRadius: 2,
                     bgcolor: '#fffff',
                     border: '1px solid #e2e8f0',

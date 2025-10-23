@@ -85,7 +85,7 @@ export default function Home() {
         minHeight: '100vh',
         bgcolor: '#f8f9fa',
         py: 4,
-        px: 10,
+        px: { xs: 0.8, sm: 4, md: 6, lg: 10 },
         color: '#0f172a'
       }}
     >
@@ -98,7 +98,7 @@ export default function Home() {
               fontWeight: 700,
               mb: 3,
               letterSpacing: '-1px',
-              fontSize: { xs: '3rem', md: '4rem', lg: '4.5rem' },
+              fontSize: { xs: '2.9rem', md: '4rem', lg: '4.5rem' },
               lineHeight: 1.1,
               fontFamily: 'var(--font-lexend)',
               position: 'relative'
@@ -149,6 +149,7 @@ export default function Home() {
                 mb: 2,
                 fontWeight: 600,
                 color: '#333',
+                fontSize: { xs: '1.4rem', md: '1.5rem', lg: '1.6rem' },
               }}
             >
               Your Notes

@@ -56,7 +56,7 @@ const NoteCard = ({
                 }
             }}
         >
-            <CardContent sx={{ px: 4, py: 3 }}>
+            <CardContent sx={{ px: { xs: 3, sm: 4, lg: 4 }, py: { xs: 2, sm: 2.5, lg: 3 } }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <Box sx={{ flex: 1 }}>
                         <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between' }}>
@@ -66,12 +66,12 @@ const NoteCard = ({
                                     fontWeight: 600,
                                     color: '#333',
                                     wordBreak: 'break-word',
-                                    fontSize: '1.3rem'
+                                    fontSize: { xs: '1.1rem', sm: '1.3rem', lg: '1.3rem' }
                                 }}
                             >
                                 {note.title}
                             </Typography>
-                            <Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                 {shouldShowAIButton && (
                                     <IconButton
                                         onClick={() => onGenerateAI(note.id)}
@@ -196,7 +196,7 @@ const NoteCard = ({
                                             sx={{
                                                 color: '#1e293b',
                                                 lineHeight: 1.6,
-                                                fontSize: '0.9rem',
+                                                fontSize: { xs: '0.8rem', sm: '1.3rem', lg: '0.9rem' },
                                                 fontWeight: 500,
                                             }}
                                         >
@@ -213,6 +213,7 @@ const NoteCard = ({
                                 lineHeight: 1.6,
                                 wordBreak: 'break-word',
                                 whiteSpace: 'pre-wrap',
+                                fontSize: { xs: '0.8rem', sm: '1rem', lg: '1rem' }
                             }}
                         >
                             {note.body}
