@@ -1,4 +1,4 @@
-import { Note } from "@/types/note";
+import { Note } from "@/app/types/note";
 import { Box, Card, CardContent, Chip, CircularProgress, IconButton, Stack, Typography } from "@mui/material";
 import { SummarySkeleton } from './NoteCardSkeleton';
 import EditIcon from '@mui/icons-material/Edit';
@@ -9,7 +9,6 @@ import generativeIcon from '@/assets/generative.svg';
 
 interface NoteCardProps {
     note: Note;
-    index: number;
     onGenerateAI: (noteId: number) => void;
     onEditNote: (note: Note) => void;
     onDeleteNote: (note: Note) => void;
@@ -20,7 +19,6 @@ interface NoteCardProps {
 
 const NoteCard = ({
     note,
-    index,
     onGenerateAI,
     onEditNote,
     onDeleteNote,

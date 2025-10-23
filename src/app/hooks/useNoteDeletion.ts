@@ -1,14 +1,10 @@
 import { useState } from 'react';
-import { Note } from '@/types/note';
-import { Toast, showToast } from '@/utils/toastUtils';
+import { Note } from '@/app/types/note';
+import { showToast } from '@/utils/toastUtils';
+import { useNotesContext } from '@/app/context/NotesContext';
 
-export const useNoteDeletion = (
-  notes: Note[],
-  setNotes: (notes: Note[]) => void,
-  setSelectedNoteForDeletion: (note: Note | null) => void,
-  setIsDeleteModalOpen: (open: boolean) => void,
-  setToast: (toast: Toast) => void
-) => {
+export const useNoteDeletion = () => {
+  const { notes, setNotes, setSelectedNoteForDeletion, setIsDeleteModalOpen, setToast } = useNotesContext();
   const [isDeletingNote, setIsDeletingNote] = useState(false);
 
   const handleRequestNoteDeletion = (note: Note) => {

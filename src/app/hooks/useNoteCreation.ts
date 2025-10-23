@@ -1,13 +1,14 @@
-import { Toast, showToast } from '@/utils/toastUtils';
-import { Note } from '@/types/note';
-import { AIContent } from '@/types/ai';
+import { showToast } from '@/utils/toastUtils';
 import { useState } from "react";
+import { useNotesContext } from '@/app/context/NotesContext';
 
-export const useNoteCreation = (
-    notes: Note[],
-    setNotes: (notes: Note[]) => void,
-    setToast: (toast: Toast) => void
-) => {
+export type AIContent = {
+  tags: string[] | null;
+  summary: string | null;
+};
+
+export const useNoteCreation = () => {
+    const { notes, setNotes, setToast } = useNotesContext();
     const [isCreatingNote, setIsCreatingNote] = useState(false);
 
     const generateAIContentForNote = async (title: string, body: string): Promise<AIContent> => {

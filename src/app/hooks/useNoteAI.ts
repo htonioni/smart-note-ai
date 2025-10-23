@@ -1,12 +1,9 @@
 import { useState } from 'react';
-import { Note } from '@/types/note';
-import { Toast, showToast } from '@/utils/toastUtils';
+import { showToast } from '@/utils/toastUtils';
+import { useNotesContext } from '@/app/context/NotesContext';
 
-export const useNoteAI = (
-  notes: Note[],
-  setNotes: (notes: Note[]) => void,
-  setToast: (toast: Toast) => void
-) => {
+export const useNoteAI = () => {
+  const { notes, setNotes, setToast } = useNotesContext();
   const [isAiGeneratingNoteIds, setIsAiGeneratingNoteIds] = useState<Set<number>>(new Set());
   const [isDeletingSummaryNoteIds, setIsDeletingSummaryNoteIds] = useState<Set<number>>(new Set());
 

@@ -1,13 +1,8 @@
-import { Note } from "@/types/note";
 import { useEffect } from "react";
-import { Toast } from '@/utils/toastUtils';
+import { useNotesContext } from '@/app/context/NotesContext';
 
-export const useNotesLoading = (
-    setNotes: (notes: Note[]) => void,
-    setFilteredNotes: (notes: Note[]) => void,
-    setIsLoadingNotes: (loading: boolean) => void,
-    setToast: (toast: Toast) => void
-) => {
+export const useNotesLoading = () => {
+    const { setNotes, setFilteredNotes, setIsLoadingNotes, setToast } = useNotesContext();
     useEffect(() => {
         const loadInitialNotes = async () => {
             try {

@@ -1,14 +1,10 @@
 import { useState } from 'react';
-import { Note } from '@/types/note';
-import { Toast, showToast } from '@/utils/toastUtils';
+import { Note } from '@/app/types/note';
+import { showToast } from '@/utils/toastUtils';
+import { useNotesContext } from '@/app/context/NotesContext';
 
-export const useNoteEditing = (
-  notes: Note[],
-  setNotes: (notes: Note[]) => void,
-  setSelectedNoteForEditing: (note: Note | null) => void,
-  setIsEditModalOpen: (open: boolean) => void,
-  setToast: (toast: Toast) => void
-) => {
+export const useNoteEditing = () => {
+  const { notes, setNotes, setSelectedNoteForEditing, setIsEditModalOpen, setToast } = useNotesContext();
   const [isSavingNote, setIsSavingNote] = useState(false);
 
   const handleRequestNoteEdit = (note: Note) => {

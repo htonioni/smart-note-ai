@@ -1,12 +1,9 @@
 import { useEffect } from 'react';
-import { Note } from '@/types/note';
 import { parseDateSearch, isNoteInDateRange } from '@/utils/dateSearchUtils';
+import { useNotesContext } from '@/app/context/NotesContext';
 
-export const useNoteSearch = (
-    notes: Note[],
-    searchQuery: string,
-    setFilteredNotes: (notes: Note[]) => void
-) => {
+export const useNoteSearch = () => {
+    const { notes, searchQuery, setFilteredNotes } = useNotesContext();
     useEffect(() => {
         const filterNotesByQuery = () => {
             if (!searchQuery.trim()) {

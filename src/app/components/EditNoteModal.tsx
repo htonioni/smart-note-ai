@@ -11,7 +11,7 @@ import {
     Chip,
     CircularProgress
 } from '@mui/material';
-import { Note } from '@/types/note';
+import { Note } from '@/app/types/note';
 
 
 interface EditNoteModalProps {

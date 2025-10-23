@@ -1,6 +1,4 @@
 'use client';
-import { useState } from 'react';
-import { Note } from '@/types/note'
 import { Box, Stack, Typography, Container } from '@mui/material';
 import NoteEmpty from './components/NoteEmpty';
 import CreateNoteForm from './components/CreateNoteForm'
@@ -11,73 +9,60 @@ import SearchBar from './components/SearchBar';
 import { NoteCardSkeleton } from './components/NoteCardSkeleton'
 import ScrollToTop from './components/ScrollToTop';
 import { ToastNotification } from './components/ToastNotification';
-import { Toast } from '@/utils/toastUtils'
 import Image from 'next/image'
 import Underline from '@/assets/underline.svg';
+import { NotesProvider } from '@/app/context/NotesContext';
 import { useNoteCreation } from './hooks/useNoteCreation';
 import { useNotesLoading } from './hooks/useNotesLoading';
 import { useNoteSearch } from './hooks/useNoteSearch';
 import { useNoteEditing } from './hooks/useNoteEditing';
 import { useNoteDeletion } from './hooks/useNoteDeletion';
 import { useNoteAI } from './hooks/useNoteAI';
+import { useNotesContext } from './context/NotesContext';
 
-export default function Home() {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [filteredNotes, setFilteredNotes] = useState<Note[]>([])
-  const [isLoadingNotes, setIsLoadingNotes] = useState(true);
-  const [selectedNoteForDeletion, setSelectedNoteForDeletion] = useState<Note | null>(null);
-  const [selectedNoteForEditing, setSelectedNoteForEditing] = useState<Note | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('')
-  const [toast, setToast] = useState<Toast>({ open: false, message: '', severity: 'success' })
+function HomeContent() {
+  const {
+    filteredNotes,
+    isLoadingNotes,
+    selectedNoteForDeletion,
+    selectedNoteForEditing,
+    isDeleteModalOpen,
+    isEditModalOpen,
+    searchQuery,
+    toast,
+    setIsDeleteModalOpen,
+    setIsEditModalOpen,
+    setSearchQuery,
+    setToast,
+    setSelectedNoteForDeletion,
+  } = useNotesContext();
 
   const {
     isCreatingNote,
     handleCreateNote
-  } = useNoteCreation(
-    notes,
-    setNotes,
-    setToast
-  );
+  } = useNoteCreation();
 
   const {
     isSavingNote,
     handleSaveNoteChanges,
     handleRequestNoteEdit
-  } = useNoteEditing(
-    notes,
-    setNotes,
-    setSelectedNoteForEditing,
-    setIsEditModalOpen,
-    setToast
-  );
+  } = useNoteEditing();
 
   const {
     isDeletingNote,
     handleRequestNoteDeletion,
     handleConfirmNoteDeletion
-  } = useNoteDeletion(
-    notes,
-    setNotes,
-    setSelectedNoteForDeletion,
-    setIsDeleteModalOpen,
-    setToast
-  )
+  } = useNoteDeletion();
 
   const {
     isAiGeneratingNoteIds,
     isDeletingSummaryNoteIds,
     handleGenerateAIForNote,
     handleDeleteNoteSummary
-  } = useNoteAI(
-    notes,
-    setNotes,
-    setToast
-  );
+  } = useNoteAI();
 
-  useNotesLoading(setNotes, setFilteredNotes, setIsLoadingNotes, setToast);
-  useNoteSearch(notes, searchQuery, setFilteredNotes);
+  useNotesLoading();
+  useNoteSearch();
 
   return (
     <Box
@@ -189,7 +174,6 @@ export default function Home() {
                       <NoteCard
                         key={`${note.id}-${note.updatedAt}`}
                         note={note}
-                        index={index}
                         onGenerateAI={handleGenerateAIForNote}
                         onEditNote={handleRequestNoteEdit}
                         onDeleteNote={handleRequestNoteDeletion}
@@ -228,5 +212,13 @@ export default function Home() {
       />
       <ScrollToTop />
     </Box>
+  );
+}
+
+export default function Home() {
+  return (
+    <NotesProvider>
+      <HomeContent />
+    </NotesProvider>
   );
 }
