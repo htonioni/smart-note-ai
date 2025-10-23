@@ -40,6 +40,8 @@ export const useNoteAI = (
         const updatedNotes = notes.map(n => n.id === noteId ? updatedNote : n);
         setNotes(updatedNotes);
         showToast('AI summary generated!', 'success', setToast)
+      } else {
+        showToast(result.error || 'Failed to generate AI content', 'error', setToast)
       }
     } catch (error) {
       console.error('Error generating AI tags:', error);

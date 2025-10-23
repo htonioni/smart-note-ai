@@ -4,22 +4,30 @@ import { useEffect } from "react";
 export const useNotesLoading = (
     setNotes: (notes: Note[]) => void,
     setFilteredNotes: (notes: Note[]) => void,
-    setIsLoadingNotes: (loading: boolean) => void
+    setIsLoadingNotes: (loading: boolean) => void,
+    setToast: (toast: any) => void
 ) => {
     useEffect(() => {
         const loadInitialNotes = async () => {
             try {
                 const response = await fetch('/api/notes');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 const data = await response.json();
                 setNotes(data);
                 setFilteredNotes(data);
             } catch (error) {
                 console.error('Failed to load notes:', error);
+                const errorMessage = error instanceof Error && error.message.includes('fetch')
+                    ? 'Failed to load your notes. Please check your internet connection and try refreshing the page.'
+                    : 'Failed to load your notes. Please try refreshing the page.';
+                setToast({ open: true, message: errorMessage, severity: 'error' });
             } finally {
                 setIsLoadingNotes(false);
             }
         };
 
         loadInitialNotes();
-    }, [setNotes, setFilteredNotes, setIsLoadingNotes]);
+    }, [setNotes, setFilteredNotes, setIsLoadingNotes, setToast]);
 };

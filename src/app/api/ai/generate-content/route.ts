@@ -46,11 +46,55 @@ async function generateTagsAndSummary(title: string, body: string) {
             success: true,
             data: aiResponse
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Gemini AI Error:', error);
+        if (error?.message) {
+            const errorMessage = error.message.toLowerCase();
+
+            // rate limit exceeded
+            if (errorMessage.includes('rate limit') || errorMessage.includes('quota exceeded') || errorMessage.includes('429')) {
+                return {
+                    success: false,
+                    error: 'AI service is temporarily overloaded due to high demand. Please try again in a few minutes.'
+                };
+            }
+
+            // resource exhausted
+            if (errorMessage.includes('resource exhausted') || errorMessage.includes('insufficient quota')) {
+                return {
+                    success: false,
+                    error: 'AI service quota exceeded. Please try again later or contact support if this persists.'
+                };
+            }
+
+            // service unavailable
+            if (errorMessage.includes('service unavailable') || errorMessage.includes('503') || errorMessage.includes('502')) {
+                return {
+                    success: false,
+                    error: 'AI service is temporarily unavailable. Please try again in a moment.'
+                };
+            }
+
+            // invalid request
+            if (errorMessage.includes('invalid') || errorMessage.includes('400')) {
+                return {
+                    success: false,
+                    error: 'Invalid request to AI service. Please check your input and try again.'
+                };
+            }
+        }
+
+        // network or connection errors
+        if (error?.name === 'TypeError' && error?.message?.includes('fetch')) {
+            return {
+                success: false,
+                error: 'Network connection failed. Please check your internet connection and try again.'
+            };
+        }
+
         return {
             success: false,
-            error: 'Failed to generate AI Content'
+            error: 'AI content generation failed. Please try again later.'
         };
     }
 }

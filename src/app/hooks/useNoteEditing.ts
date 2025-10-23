@@ -31,11 +31,25 @@ export const useNoteEditing = (
         setIsEditModalOpen(false);
         showToast('Note updated!', 'success', setToast)
       } else {
-        showToast('Failed to update note', 'error', setToast)
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+
+        if (response.status === 404) {
+          showToast('Note not found. It may have been deleted.', 'error', setToast);
+        } else if (response.status === 500) {
+          showToast('Server error occurred while updating note. Please try again.', 'error', setToast);
+        } else if (response.status >= 500) {
+          showToast('Service temporarily unavailable. Please try again in a moment.', 'error', setToast);
+        } else {
+          showToast('Failed to update note. Please try again.', 'error', setToast);
+        }
       }
     } catch (error) {
       console.error('Error updating note:', error);
-      showToast('Error updating note', 'error', setToast);
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        showToast('Connection failed. Please check your internet and try again.', 'error', setToast);
+      } else {
+        showToast('An unexpected error occurred while updating your note.', 'error', setToast);
+      }
     } finally {
       setIsSavingNote(false);
     }

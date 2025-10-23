@@ -77,7 +77,7 @@ export default function Home() {
     setToast
   );
 
-  useNotesLoading(setNotes, setFilteredNotes, setIsLoadingNotes);
+  useNotesLoading(setNotes, setFilteredNotes, setIsLoadingNotes, setToast);
   useNoteSearch(notes, searchQuery, setFilteredNotes);
 
   return (

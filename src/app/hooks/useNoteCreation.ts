@@ -24,11 +24,15 @@ export const useNoteCreation = (
               tags: result.data.tags,
               summary: result.data.summary
             };
+          } else {
+            showToast(result.error || 'AI content generation failed', 'warning', setToast);
+            return { tags: null, summary: null };
           }
         } catch (error) {
           console.error('AI generation failed:', error);
+          showToast('AI service temporarily unavailable. Note will be saved without AI content.', 'warning', setToast);
+          return { tags: null, summary: null };
         }
-        return { tags: null, summary: null };
       };
 
     const handleCreateNote = async (
@@ -64,11 +68,26 @@ export const useNoteCreation = (
                 setNotes([newNote, ...notes]);
                 showToast('Note Created successfully!', "success", setToast)
             } else {
-                showToast('Failed to create note', 'error', setToast)
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                const errorMessage = errorData.error || 'Failed to create note';
+
+                if (response.status === 500) {
+                    showToast('Server error occurred while creating note. Please try again.', 'error', setToast);
+                } else if (response.status === 400) {
+                    showToast('Invalid note data. Please check your input and try again.', 'error', setToast);
+                } else if (response.status >= 500) {
+                    showToast('Service temporarily unavailable. Please try again in a moment.', 'error', setToast);
+                } else {
+                    showToast(errorMessage, 'error', setToast);
+                }
             }
         } catch (error) {
             console.error('Error creating note: ', error);
-            showToast('Error creating note', 'error', setToast);
+            if (error instanceof TypeError && error.message.includes('fetch')) {
+                showToast('Connection failed. Please check your internet and try again.', 'error', setToast);
+            } else {
+                showToast('An unexpected error occurred while creating your note.', 'error', setToast);
+            }
         } finally {
             setIsCreatingNote(false);
         }
