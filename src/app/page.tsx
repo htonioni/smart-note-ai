@@ -1,6 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { Note } from '../types/note'
+import { useState } from 'react';
+import { Note } from '@/types/note'
+import { AIContent } from '@/types/ai';
 import { Box, Stack, Typography, Container } from '@mui/material';
 import NoteEmpty from './components/NoteEmpty';
 import CreateNoteForm from './components/CreateNoteForm'
@@ -11,114 +12,29 @@ import SearchBar from './components/SearchBar';
 import { NoteCardSkeleton } from './components/NoteCardSkeleton'
 import ScrollToTop from './components/ScrollToTop';
 import { ToastNotification } from './components/ToastNotification';
-import { Toast, showToast } from '../utils/toastUtils'
-import { parseDateSearch, isNoteInDateRange } from '../utils/dateSearchUtils'
+import { Toast } from '@/utils/toastUtils'
 import Image from 'next/image'
-import Underline from '../assets/underline.svg';
+import Underline from '@/assets/underline.svg';
+import { useNoteCreation } from './hooks/useNoteCreation';
+import { useNotesLoading } from './hooks/useNotesLoading';
+import { useNoteSearch } from './hooks/useNoteSearch';
+import { useNoteEditing } from './hooks/useNoteEditing';
+import { useNoteDeletion } from './hooks/useNoteDeletion';
+import { useNoteAI } from './hooks/useNoteAI';
 
 export default function Home() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [filteredNotes, setFilteredNotes] = useState<Note[]>([])
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
-  const [isCreatingNote, setIsCreatingNote] = useState(false);
-  const [isAiGeneratingNoteIds, setIsAiGeneratingNoteIds] = useState<Set<number>>(new Set());
-  const [isDeletingSummaryNoteIds, setIsDeletingSummaryNoteIds] = useState<Set<number>>(new Set());
   const [selectedNoteForDeletion, setSelectedNoteForDeletion] = useState<Note | null>(null);
   const [selectedNoteForEditing, setSelectedNoteForEditing] = useState<Note | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeletingNote, setIsDeletingNote] = useState(false);
-  const [isSavingNote, setIsSavingNote] = useState(false);
   const [searchQuery, setSearchQuery] = useState('')
   const [toast, setToast] = useState<Toast>({ open: false, message: '', severity: 'success' })
 
-  const loadInitialNotes = async () => {
-    try {
-      const response = await fetch('/api/notes');
-      const data = await response.json();
-      setNotes(data);
-      setFilteredNotes(data);
-    } catch (error) {
-      console.error('Failed to load notes:', error);
-    } finally {
-      setIsLoadingNotes(false);
-    }
-  };
 
-  useEffect(() => {
-    loadInitialNotes();
-  }, []);
-
-  const filterNotesByQuery = () => {
-    if (!searchQuery.trim()) {
-      setFilteredNotes(notes);
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    const dateSearchResult = parseDateSearch(query);
-    
-    const filtered = notes.filter(note => {
-      if (dateSearchResult.isDateSearch && dateSearchResult.dateRange) {
-        return isNoteInDateRange(note.updatedAt, dateSearchResult.dateRange);
-      }
-      
-      // otherwise regular search
-      const titleMatch = note.title.toLowerCase().includes(query);
-      const bodyMatch = note.body.toLowerCase().includes(query);
-      const tagMatch = note.tags?.some(tag => tag.toLowerCase().includes(query)) || false;
-      const summaryMatch = note.summary?.toLowerCase().includes(query) || false;
-
-      return titleMatch || bodyMatch || tagMatch || summaryMatch;
-    });
-
-    setFilteredNotes(filtered);
-  };
-
-  useEffect(() => {
-    filterNotesByQuery();
-  }, [searchQuery, notes]);
-
-  const handleCreateNote = async (title: string, body: string, aiEnabled: boolean) => {
-    setIsCreatingNote(true);
-
-    let generatedTags = null;
-    let generatedSummary = null;
-
-    if (aiEnabled) {
-      const aiContent = await generateAIContentForNote(title, body);
-      generatedTags = aiContent.tags;
-      generatedSummary = aiContent.summary;
-    }
-
-    try {
-      const response = await fetch('/api/notes', {
-        method: "POST",
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: title.trim(),
-          body: body.trim(),
-          tags: generatedTags,
-          summary: generatedSummary,
-        })
-      });
-
-      if (response.ok) {
-        const newNote = await response.json();
-        setNotes([newNote, ...notes]);
-        showToast('Note Created successfully!', "success", setToast)
-      } else {
-        showToast('Failed to create note', 'error', setToast)
-      }
-    } catch (error) {
-      console.error('Error creating note: ', error);
-      alert('Error creating note.')
-    } finally {
-      setIsCreatingNote(false);
-    }
-  };
-
-  const generateAIContentForNote = async (title: string, body: string) => {
+  const generateAIContentForNote = async (title: string, body: string): Promise<AIContent> => {
     try {
       const aiResponse = await fetch('/api/ai/generate-content', {
         method: 'POST',
@@ -139,138 +55,55 @@ export default function Home() {
     return { tags: null, summary: null };
   };
 
-  const handleSaveNoteChanges = async (updatedNote: Note) => {
-    setIsSavingNote(true);
-    try {
-      const response = await fetch(`/api/notes/${updatedNote.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedNote),
-      });
-
-      if (response.ok) {
-        const savedNote = await response.json();
-        setNotes(notes.map(n => n.id === savedNote.id ? savedNote : n));
-        setIsEditModalOpen(false);
-        showToast('Note updated!', 'success', setToast)
-      } else {
-        showToast('Failed to update note', 'error', setToast)
-      }
-    } catch (error) {
-      console.error('Error updating note:', error);
-      alert('Error updating note');
-    } finally {
-      setIsSavingNote(false);
-    }
-  };
-
-  const handleConfirmNoteDeletion = async (noteId: number) => {
-    setIsDeletingNote(true);
-    try {
-      const response = await fetch(`/api/notes/${noteId}`, { method: 'DELETE' });
-
-      if (response.ok) {
-        setNotes(notes.filter(n => n.id !== noteId));
-        setIsDeleteModalOpen(false);
-        setSelectedNoteForDeletion(null);
-        showToast('Note deleted!', 'success', setToast)
-      } else {
-        showToast('Failed to delete note', 'error', setToast)
-      }
-    } catch (error) {
-      console.error('Error deleting note:', error);
-      alert('Error deleting note');
-    } finally {
-      setIsDeletingNote(false);
-    }
-  };
-
-  const handleRequestNoteDeletion = (note: Note) => {
-    setSelectedNoteForDeletion(note);
-    setIsDeleteModalOpen(true);
-  };
-
   const handleRequestNoteEdit = (note: Note) => {
     setSelectedNoteForEditing(note);
     setIsEditModalOpen(true);
   };
 
-  const handleGenerateAIForNote = async (noteId: number) => {
-    setIsAiGeneratingNoteIds(prev => new Set([...prev, noteId]));
-    try {
-      const note = notes.find(n => n.id === noteId);
-      if (!note) return;
+  const { isCreatingNote, handleCreateNote } = useNoteCreation(
+    notes,
+    setNotes,
+    generateAIContentForNote,
+    setToast
+  );
 
-      const response = await fetch('/api/ai/generate-content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: note.id,
-          title: note.title,
-          body: note.body,
-          summary: note.summary
-        })
-      });
+  const {
+    isSavingNote,
+    handleSaveNoteChanges
+  } = useNoteEditing(
+    notes,
+    setNotes,
+    setIsEditModalOpen,
+    setToast
+  );
 
-      const result = await response.json();
+  const {
+    isDeletingNote,
+    handleRequestNoteDeletion,
+    handleConfirmNoteDeletion
+  } = useNoteDeletion(
+    notes,
+    setNotes,
+    setSelectedNoteForDeletion,
+    setIsDeleteModalOpen,
+    setToast
+  )
 
-      if (result.success) {
-        const updatedNote = { ...note, tags: result.data.tags, summary: result.data.summary };
+  const {
+    isAiGeneratingNoteIds,
+    isDeletingSummaryNoteIds,
+    handleGenerateAIForNote,
+    handleDeleteNoteSummary
+  } = useNoteAI(
+    notes,
+    setNotes,
+    setToast
+  );
 
-        await fetch(`/api/notes/${noteId}`, {
-          method: 'PUT',
-          headers: { 'Content-type': 'application/json' },
-          body: JSON.stringify(updatedNote)
-        });
+  useNotesLoading(setNotes, setFilteredNotes, setIsLoadingNotes);
+  useNoteSearch(notes, searchQuery, setFilteredNotes);
 
-        setNotes(prevNotes => prevNotes.map(n => n.id === noteId ? updatedNote : n));
-        showToast('AI summary generated!', 'success', setToast)
-      }
-    } catch (error) {
-      console.error('Error generating AI tags:', error);
-      showToast('Failed to generate AI content', 'error', setToast)
-    } finally {
-      setIsAiGeneratingNoteIds(prev => {
-        const updated = new Set(prev);
-        updated.delete(noteId);
-        return updated;
-      });
-    }
-  };
-
-  const handleDeleteNoteSummary = async (noteId: number) => {
-    setIsDeletingSummaryNoteIds(prev => new Set([...prev, noteId]));
-    try {
-      const note = notes.find(n => n.id === noteId);
-      if (!note) return;
-
-      const updatedNote = { ...note, summary: null };
-
-      const response = await fetch(`/api/notes/${noteId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedNote),
-      });
-
-      if (response.ok) {
-        setNotes(prevNotes => prevNotes.map(n => n.id === noteId ? updatedNote : n));
-        showToast('Summary removed!', 'success', setToast)
-      } else {
-        showToast('Failed to delete note summary', 'error', setToast)
-      }
-    } catch (error) {
-      console.error('Error deleting summary:', error);
-      showToast('Failed to delete note summary', 'error', setToast)
-    } finally {
-      setIsDeletingSummaryNoteIds(prev => {
-        const updated = new Set(prev);
-        updated.delete(noteId);
-        return updated;
-      });
-    }
-  };
-
-  return (
+return (
     <Box
       sx={{
         minHeight: '100vh',
