@@ -1,5 +1,5 @@
 
-# 📝 SmartNote AI
+# SmartNote AI 📝
 
 A modern, full-stack note management application with intelligent AI-powered organization and beautiful user experience.
 
@@ -7,100 +7,129 @@ A modern, full-stack note management application with intelligent AI-powered org
 
 ## About the Project
 
-**SmartNote AI** represents the perfect blend of modern web development and artificial intelligence. This sophisticated note-taking application doesn't just store your thoughts—it understands them. Using advanced AI analysis, SmartNote automatically categorizes your content, generates meaningful summaries, and provides intelligent insights that transform how you organize and retrieve information.
+**SmartNote AI** is a full-stack note-taking application. Rather than just storing text, the application leverages Google Gemini AI to intelligently analyze content, automatically generating contextual tags and meaningful summaries.
 
-Built with the latest web technologies and a focus on user experience, SmartNote AI demonstrates enterprise-level development practices while maintaining an intuitive, responsive interface that works seamlessly across all devices.
+## 📋 Features
 
-## Features
+### Note Management
+- **Full CRUD Operations** - Create, view, edit, and delete notes with real-time updates
+- **Character Limits** - Title (60 chars) and body (1,500 chars) with live counters
+- **Smart Organization** - Notes stored with title, body, AI tags, summaries, and timestamps
+- **Automatic Timestamps** - ISO string timestamps with relative display ("2 hours ago")
+- **Responsive Design** - Mobile layout supporting xs, sm, md, lg breakpoints
 
-### 📋 Complete Note Management
-- **Full CRUD Operations** - Create, view, edit and delete notes seamlessly
-- **Rich Text Support** - Preserve line breaks and formatting in note content
-- **Smart Organization** - Notes display with title, body, tags, and timestamps
-- **Date Management** - Automatic timestamps with relative time display ("2 hours ago")
-- **Responsive Design** - Works perfectly on desktop, tablet, and mobile devices
-
-### Advanced AI Integration
-- **Intelligent Tag Generation** - AI analyzes content and suggests 3-4 relevant tags
-- **Smart Summary Creation** - AI generates insightful summaries focusing on purpose and context
-- **Flexible AI Control** - Toggle AI features on/off when creating notes
-- **Post-Creation AI** - Generate AI tags and summaries for existing notes
-- **Summary Management** - Delete AI summaries while keeping manual content
-- **Context-Aware Analysis** - AI provides meaningful insights, not just content repetition
+### AI Integration
+- **Gemini-Powered Analysis** - Google Gemini 2.5 Flash generates 3-4 contextual tags
+- **Context-Aware Summaries** - AI produces summaries focusing on purpose, not repetition
+- **Toggle AI On/Off** - User control for when to apply AI processing during note creation
+- **Post-Creation AI** - Re-generate tags/summaries for existing notes with one click
+- **Lazy Generation** - AI icon on cards triggers generation without page reload
 
 ### Enhanced Search & Navigation
-- **Real-Time Search** - Instant filtering as you type across titles, content, tags, and summaries
-- **Search Results Counter** - See exactly how many notes match your query
-- **Tag-Based Filtering** - Click tags to filter notes by category
-- **Scroll to Top** - Smooth scroll button for easy navigation on long lists
-- **Visual Feedback** - Clear "no results" states and loading indicators
+- **Real-Time Search** - Instant multi-field filtering across title, body, tags, summary and date as you type
+- **Search Results Counter** - Visual feedback showing exact match count
+- **Scroll to Top** - Smooth navigation button for browsing long lists
+- **No Results UX** - Clear messaging when search yields no matches
 
 ### Modern User Experience
-- **Beautiful Animations** - Smooth card animations and hover effects
-- **Professional Modals** - Clean, Apple-like design for edit and delete actions
-- **Loading States** - Professional loading indicators for all async operations
-- **iOS-Style Toggles** - Modern switch controls for AI features
-- **Custom Skeletons** - Realistic loading placeholders that match actual content
-- **SVG Underlines** - Stylish visual elements in the header design
-
-### Robust Data Management
-- **Persistent Storage** - All data securely stored in Supabase PostgreSQL
-- **Real-Time Updates** - Changes reflect immediately without page refresh
-- **Data Integrity** - Comprehensive error handling and validation
-- **Type Safety** - Full TypeScript integration for reliable data flow
+- **Smooth Animations** - Card entrance animations with staggered timing
+- **Modals** - Modals to edit and delete notes
+- **Loading Skeletons** - Realistic placeholders during async operations
+- **Toast Notifications** - User feedback for all actions (success, error, warning messages)
+- **Material-UI Components** - Polished UI with responsive sx prop styling
 
 ## 🏗️ Architecture
 
-The project follows a modern full-stack architecture:
-
-1. **Frontend (React/Next.js)** 
-2. **API Routes (Next.js)** 
-3. **Supabase (PostgreSQL)** 
-4. **AI API (Gemini - GenAI)**
-
-![System Architecture](./src/assets/note-diagram.png)
-
-### Data Flow
+### System Design
 
 ```
-User → Frontend → API Route → Supabase (saves note)
-                      ↓
-                 AI API (analyzes text)
-                      ↓
-                Frontend ← (returns suggestions)
+┌─────────────────────────────────────────────────────────────┐
+│  Frontend (React 19 + Next.js 15)                           │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ NotesContext (React Context API)                     │   │
+│  │ - Centralized state (notes, modals, loading, toast)  │   │
+│  └──────────────────────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ 6 Custom Hooks (Business Logic)                      │   │
+│  │ - useNotesLoading, useNoteCreation, etc.             │   │
+│  └──────────────────────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ Components (Presentation)                            │   │
+│  │ - CreateNoteForm, NoteCard, SearchBar, etc.          │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ (fetch/POST/PUT/DELETE)
+┌─────────────────────────────────────────────────────────────┐
+│  API Routes (Next.js Serverless Functions)                  │
+│  - /api/notes (GET list, POST create)                       │
+│  - /api/notes/[id] (PUT update, DELETE)                     │
+│  - /api/ai/generate-content (POST AI analysis)              │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ (Supabase client)
+┌─────────────────────────────────────────────────────────────┐
+│  Database (Supabase PostgreSQL)                             │
+│  - notes table (id, title, body, tags, summary, updatedAt)  │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ (for AI operations)
+┌─────────────────────────────────────────────────────────────┐
+│  Google Gemini 2.5 Flash API (@google/genai)                │
+│  - Analyzes content, generates tags & summaries             │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+### 🎲 Data Flow
+
+**Creating a Note with AI:**
+```
+User Input → CreateNoteForm → useNoteCreation hook 
+  → POST /api/notes → Supabase saves note
+  → (if aiEnabled) POST /api/ai/generate-content → Gemini API
+  → PUT /api/notes/[id] with tags/summary → Supabase updates
+  → UI updates via context → Toast notification
+```
+
+### Key Architectural Decisions
+
+| Decision | Rationale | Trade-offs |
+|----------|-----------|-----------|
+| **Context API over Redux** | Simpler, no external deps, built-in to React | Less tooling for large apps, but sufficient here |
+| **Custom Hooks for Logic** | Business logic separated from UI, reusable | More files, but clearer responsibilities |
+| **Set\<number\> for AI loading** | Track multiple concurrent AI operations | More complex than single boolean, but accurate |
+| **AI is optional** | Progressive enhancement, graceful degradation | Added complexity for null/undefined handling |
 
 ## 🛠️ Technologies
 
 ### Frontend Stack
-- **Next.js 15** - React framework with App Router and modern features
-- **React 19** - Latest UI library with enhanced performance
-- **TypeScript** - Full static typing for development reliability
-- **Material-UI (MUI)** - Professional component library with custom styling
-- **CSS-in-JS** - Styled components with responsive design principles
+- **Next.js 15** (App Router, Turbopack) - React framework with server-side rendering
+- **React 19** - Latest UI library with enhanced performance and server components
+- **TypeScript 5** - Full strict-mode static typing for type safety
+- **Material-UI 7.3** - Professional component library with responsive `sx` prop styling
+- **Emotion** - CSS-in-JS solution for dynamic styling
 
 ### Backend & Database
-- **Supabase** - Backend-as-a-Service with PostgreSQL database
-- **Next.js API Routes** - Serverless backend functions
-- **RESTful APIs** - Clean API design for data operations
+- **Supabase PostgreSQL** - Managed backend with real-time capabilities
+- **Next.js API Routes** - Serverless functions for business logic
+- **RESTful API Design** - Clean endpoints with pagination support
 
 ### AI & External Services
-- **Google Gemini AI** - Advanced natural language processing for tag and summary generation
-- **Real-time AI Processing** - Instant content analysis and suggestions
+- **Google GenAI (@google/genai v1.25)** - Gemini 2.5 Flash for intelligent content analysis
+- **Prompt Engineering** - Structured prompts for 3-4 tag generation and 212-char summaries
 
-### Development & Deployment
-- **Modern JavaScript (ES2024)** - Latest language features
-- **Component Architecture** - Modular, reusable component design
-- **Custom Hooks** - Efficient state management patterns
-- **Performance Optimization** - Loading states, animations, and smooth UX
+### Architecture & State Management
+- **React Context API** - Centralized state management without external libraries
+- **Custom React Hooks** - Domain-specific hooks for business logic separation
+
+### Development Tools
+- **Turbopack** - Fast build tool for development and production
+- **Component Architecture** - Modular, reusable components with clear responsibilities
 
 ## 🚀 How to Run
 
 ### Prerequisites
 
 - Node.js 20+
-- [Supabase](https://supabase.com) account
-- [Google AI Studio](https://aistudio.google.com/) API key for Gemini
+- [Supabase](https://supabase.com) account with PostgreSQL database
+- [Google AI Studio](https://aistudio.google.com/) API key for Gemini 2.5 Flash
 
 ### Installation
 
@@ -117,19 +146,35 @@ npm install
 
 3. Configure environment variables
 
-Create a `.env.local` file:
+Create a `.env.local` file in the root directory:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 GEMINI_API_KEY=your_google_gemini_api_key
 ```
 
-4. Run the development server
+4. Set up Supabase database
+
+Create a `notes` table in your Supabase project with the following schema:
+```sql
+CREATE TABLE notes (
+  id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  title VARCHAR(60) NOT NULL,
+  body VARCHAR(1500),
+  tags JSONB,
+  summary VARCHAR(212),
+  updatedAt TIMESTAMP DEFAULT NOW(),
+);
+
+CREATE INDEX idx_notes_updated_at ON notes(updatedAt DESC);
+```
+
+5. Run the development server
 ```bash
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+6. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## 📦 Production Build
 
@@ -138,21 +183,57 @@ npm run build
 npm start
 ```
 
-## 🎨 Future Enhancements
+## 🏆 Development Best Practices
 
-- [x] ✅ **Smart AI Summaries** - Context-aware summaries that provide insights, not repetition
-- [x] ✅ **Real-time Search** - Instant filtering across all note content
-- [x] ✅ **Professional UI Components** - Modern modals and interactive elements
-- [x] ✅ **Scroll to Top Navigation** - Smooth navigation for long note lists
-- [x] ✅ **Line Break Preservation** - Maintain formatting in note display
-- [x] ✅ **Loading State Management** - Professional loading indicators throughout
-- [ ] 🔄 **Toast Notifications** - User feedback for actions and errors
-- [ ] 📌 **Note Favoriting** - Pin important notes to the top
-- [ ] 🏷️ **Advanced Tag Management** - Custom tag colors and organization
-- [ ] 📱 **Progressive Web App** - Offline functionality and mobile app experience
-- [ ] 🔍 **Advanced Search Filters** - Date ranges, tag combinations, and more
-- [ ] 📤 **Export Functionality** - Export notes as PDF, Markdown, or JSON
-- [ ] 👥 **Collaboration Features** - Share notes and collaborative editing
+This project demonstrates several development patterns worth studying:
+
+### Error Handling
+All async operations follow a consistent pattern:
+```typescript
+try {
+  // async work
+  showToast('Success message', 'success', setToast);
+} catch (error) {
+  const message = error instanceof TypeError && error.message.includes('fetch')
+    ? 'Connection error' : 'Operation failed';
+  showToast(message, 'error', setToast);
+}
+```
+
+### State Management Pattern
+Context API with custom hooks prevents prop drilling:
+```typescript
+// In hook:
+const { notes, setNotes, setToast } = useNotesContext();
+
+// In component:
+const { handleCreateNote, isCreatingNote } = useNoteCreation();
+```
+
+### Responsive Design
+Mobile approach with MUI breakpoints:
+```typescript
+sx={{
+  fontSize: { xs: '1.4rem', md: '1.5rem', lg: '1.6rem' },
+  flexDirection: { xs: 'column', lg: 'row' }
+}}
+```
+
+### AI Integration Strategy
+Prompt engineering with structured output requirements:
+- Tag constraint: 3-4 lowercase words
+- Summary limit: 212 characters
+- Format: Valid JSON only (strips markdown)
+- Fallback: Notes save without AI if generation fails
+
+## 🔧 Scripts
+
+```bash
+npm run dev         # Start development server with Turbopack (http://localhost:3000)
+npm run build       # Turbopack production build
+npm run start       # Run production server
+npm run lint        # ESLint code quality check
+```
 
 ## 📄 License
 
@@ -165,8 +246,8 @@ This project is for educational and demonstration purposes.
 🔗 **LinkedIn**: [linkedin.com/in/htonioni](https://linkedin.com/in/htonioni)  
 💻 **GitHub**: [github.com/htonioni](https://github.com/htonioni)
 
-Developed to demonstrate skills in modern full-stack development, AI integration, and software architecture best practices.
 
 ---
 
-⭐ If this project was helpful, consider giving it a star!
+<div style="text-align: center;">Developed with ♥ to demonstrate my skills in full-stack development, AI integration, and software architecture best practices.</div>
+<div style="text-align: center;">If this project was helpful, consider giving it a star!⭐</div>
