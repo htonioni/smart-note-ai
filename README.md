@@ -9,6 +9,10 @@ A modern, full-stack note management application with intelligent AI-powered org
 
 **SmartNote AI** is a full-stack note-taking application. Rather than just storing text, the application leverages Google Gemini AI to intelligently analyze content, automatically generating contextual tags and meaningful summaries.
 
+| Note Creation | Note Display with AI enabled | Real-time search (tags, content, dates) |
+|----------|-----------|-----------| 
+| ![create](./src/assets/create-note.png) | ![display](./src/assets/note-display.png) | ![search](./src/assets/note-search.png)
+
 ## 📋 Features
 
 ### Note Management
@@ -96,6 +100,7 @@ User Input → CreateNoteForm → useNoteCreation hook
 | **Custom Hooks for Logic** | Business logic separated from UI, reusable | More files, but clearer responsibilities |
 | **Set\<number\> for AI loading** | Track multiple concurrent AI operations | More complex than single boolean, but accurate |
 | **AI is optional** | Progressive enhancement, graceful degradation | Added complexity for null/undefined handling |
+
 
 ## 🛠️ Technologies
 
